@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: armygame_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: armygame
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      # Toto naimportuje tvůj SQL dump při prvním spuštění kontejneru:
+      - ../armygame.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  db_data:

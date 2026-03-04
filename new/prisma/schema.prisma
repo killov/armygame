@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model akce {
+  id           Int  @id @default(autoincrement())
+  user         Int?
+  mesto        Int?
+  cil          Int
+  budova       Int?
+  delka        Int?
+  cas          Int?
+  dokonceni    Int
+  typ          Int?
+  typ_jednotky Int
+  obchodniku   Int?
+  surovina1    Int?
+  surovina2    Int?
+  surovina3    Int?
+  surovina4    Int?
+  j1           Int
+  j2           Int
+  j3           Int
+  j4           Int
+  j5           Int
+  j6           Int
+  j7           Int
+  j8           Int
+}
+
+model cesta {
+  id       Int    @id @default(autoincrement())
+  start_x  Int
+  start_y  Int
+  target_x Int
+  target_y Int
+  cesta    String @db.Text
+
+  @@index([start_x])
+  @@index([start_y])
+  @@index([target_x])
+  @@index([target_y])
+}
+
+model chat {
+  id   Int    @id @default(autoincrement())
+  u1   Int
+  u2   Int
+  time Int
+  text String @db.VarChar(1000)
+}
+
+model mapa {
+  id      Int @id @default(autoincrement())
+  x       Int
+  y       Int
+  blokx   Int
+  bloky   Int
+  typ     Int
+  hrana   Int
+  stat    Int
+  hranice Int
+  dom     Int
+
+  @@index([blokx])
+  @@index([bloky])
+  @@index([x])
+  @@index([y])
+  @@index([typ])
+}
+
+model mapa_bloky {
+  id    Int @id @default(autoincrement())
+  x     Int
+  y     Int
+  verze Int
+
+  @@index([x])
+  @@index([y])
+}
+
+model mesto {
+  id                 Int    @id @default(autoincrement())
+  x                  Int
+  y                  Int
+  typ                Int
+  stat               Int
+  statjmeno          String @db.VarChar(20)
+  user               Int
+  userjmeno          String @db.VarChar(20)
+  jmeno              String @db.VarChar(20)
+  surovina1          Int
+  surovina1_produkce Int
+  surovina2          Int
+  surovina2_produkce Int
+  surovina3          Int
+  surovina3_produkce Int
+  surovina4          Int
+  surovina4_produkce Int
+  suroviny_time      Int
+  sklad              Int
+  populace           Int
+  b1                 Int
+  b2                 Int
+  b3                 Int
+  b4                 Int
+  b5                 Int
+  b6                 Int
+  b7                 Int
+  b8                 Int
+  b9                 Int
+  b10                Int
+  b11                Int
+  v1                 Int
+  v2                 Int
+  v3                 Int
+  v4                 Int
+  v5                 Int
+  v6                 Int
+  v7                 Int
+  v8                 Int
+  j1                 Int
+  j2                 Int
+  j3                 Int
+  j4                 Int
+  j5                 Int
+  j6                 Int
+  j7                 Int
+  j8                 Int
+  smrt               Int
+}
+
+model podpory {
+  id        Int @id @default(autoincrement())
+  mesto     Int
+  kde       Int
+  j1        Int
+  j2        Int
+  j3        Int
+  j4        Int
+  j5        Int
+  j6        Int
+  j7        Int
+  j8        Int
+  surovina1 Int
+  surovina2 Int
+  surovina3 Int
+  surovina4 Int
+}
+
+model pohyb {
+  id   Int @id @default(autoincrement())
+  akce Int
+  x    Int
+  y    Int
+  cas  Int
+}
+
+model stat {
+  id     Int    @id @default(autoincrement())
+  jmeno  String @db.VarChar(20)
+  clenu  Int
+  pop    Int
+  poradi Int
+}
+
+model stat_pozvanky {
+  id        Int    @id @default(autoincrement())
+  stat      Int
+  statjmeno String @db.VarChar(20)
+  user      Int
+  userjmeno String @db.VarChar(20)
+}
+
+model tasks {
+  id  Int @id @default(autoincrement())
+  pro Int
+  typ Int
+  x   Int
+  y   Int
+}
+
+model users {
+  id        Int    @id @default(autoincrement())
+  jmeno     String @db.VarChar(20)
+  heslo     String @db.VarChar(32)
+  email     String @db.VarChar(30)
+  mesto     Int
+  pop       Int
+  mest      Int
+  poradi    Int
+  zprava    Int
+  stat      Int
+  statjmeno String @db.VarChar(20)
+  sp_all    Int
+  penize    Int
+  v1        Int
+  v2        Int
+  v3        Int
+  v4        Int
+  v5        Int
+  banka     Int
+}
+
+model ws_auth {
+  id   Int    @id @default(autoincrement())
+  user Int
+  hash String @db.VarChar(32)
+  time Int
+}
