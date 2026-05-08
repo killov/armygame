@@ -11,6 +11,8 @@ import { CityService } from '@/services/CityService';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime, produkce, skladKapacita } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
 import { BattleService } from '@/services/BattleService';
+import CountdownTimer from '@/app/game/CountdownTimer';
+import Link from 'next/link';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
@@ -114,7 +116,7 @@ export default async function MestoPage() {
                     {((updatedCity?.[`b${a.budova}` as keyof typeof updatedCity] as number) ?? 0) + 1}
                   </span>
                   <span className={styles.queueTime}>
-                    Hotovo: {new Date(a.dokonceni * 1000).toLocaleString('cs-CZ')}
+                    <CountdownTimer dokonceni={a.dokonceni} />
                   </span>
                 </li>
               ))}
@@ -151,7 +153,7 @@ export default async function MestoPage() {
                 updatedCity.surovina2 >= cost.surovina2;
               return (
                 <tr key={id}>
-                  <td>{b.nazev}</td>
+                  <td><Link href={`/game/budovy/${id}`} style={{ color: '#333', textDecoration: 'none', fontWeight: 500 }}>{b.nazev}</Link></td>
                   <td>
                     {isMax ? (
                       <span className={styles.maxBadge}>MAX</span>

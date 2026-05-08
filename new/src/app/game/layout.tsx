@@ -9,6 +9,9 @@ import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
 import { produkce } from '@/lib/gameData';
+import { JEDNOTKY } from '@/lib/armyData';
+import ResourceBar from './ResourceBar';
+import MapBackground from './MapBackground';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
@@ -41,7 +44,6 @@ export default async function GameLayout({
   const session = await getSession();
   if (!session) redirect('/login');
 
-  // Načti suroviny prvního města uživatele
   const db = new DatabaseService();
   const mestoRepo = new MestoRepository(db);
   const akceRepo = new AkceRepository(db);
@@ -51,125 +53,172 @@ export default async function GameLayout({
   const city = cities[0] ?? null;
 
   let resources = null;
+  let resourceBarProps = null;
   if (city) {
     try {
       resources = await cityService.getResources(city.id);
+      const surovinyTime = Math.floor(Date.now() / 1000);
+      resourceBarProps = {
+        initialS1: resources.s1,
+        initialS2: resources.s2,
+        initialS3: resources.s3,
+        initialS4: resources.s4,
+        prodS1: produkce(city.b2),
+        prodS2: produkce(city.b3),
+        prodS3: produkce(city.b4),
+        prodS4: produkce(city.b5),
+        sklad: resources.sklad,
+        surovinyTime,
+      };
     } catch {
-      // Pokud selže načtení surovin, pokračuj bez nich
+      // Pokud selze nacteni surovin, pokracuj bez nich
     }
   }
 
-  const cityForProd = city;
+  // Gather unit counts for sidebar
+  const unitEntries = city
+    ? Object.entries(JEDNOTKY)
+        .map(([idStr, j]) => {
+          const id = Number(idStr);
+          const key = `j${id}` as keyof typeof city;
+          const count = (city[key] as number) ?? 0;
+          return { id, name: j.nazev, emoji: j.emoji, count };
+        })
+        .filter((u) => u.count > 0)
+    : [];
 
   return (
     <div className={styles.gameLayout}>
-      <nav className={styles.nav}>
+      <MapBackground />
+
+      {/* ===== TOP BAR ===== */}
+      <div className={styles.topBar}>
         <Link href="/game" className={styles.logo}>
           ArmyGame
         </Link>
+
         <ul className={styles.navLinks}>
           <li>
             <Link href="/game/mesto" className={styles.navLink}>
-              Město
+              Mesto
             </Link>
           </li>
+          <li><span className={styles.navSeparator}>|</span></li>
           <li>
             <Link href="/game/budovy" className={styles.navLink}>
               Budovy
             </Link>
           </li>
+          <li><span className={styles.navSeparator}>|</span></li>
           <li>
             <Link href="/game/jednotky" className={styles.navLink}>
               Jednotky
             </Link>
           </li>
+          <li><span className={styles.navSeparator}>|</span></li>
           <li>
             <Link href="/game/mapa" className={styles.navLink}>
               Mapa
             </Link>
           </li>
+          <li><span className={styles.navSeparator}>|</span></li>
           <li>
             <Link href="/game/vyzkum" className={styles.navLink}>
-              Výzkum
+              Vyzkum
             </Link>
           </li>
+          <li><span className={styles.navSeparator}>|</span></li>
           <li>
             <Link href="/game/pohyb" className={styles.navLink}>
               Operace
             </Link>
           </li>
+          <li><span className={styles.navSeparator}>|</span></li>
           <li>
             <Link href="/game/profil" className={styles.navLink}>
               Profil
             </Link>
           </li>
         </ul>
+
+        {resourceBarProps ? (
+          <ResourceBar {...resourceBarProps} />
+        ) : (
+          <div className={styles.topResources}>
+            <span className={styles.resourceBadge}>---</span>
+          </div>
+        )}
+
         <form action={logoutAction}>
           <button type="submit" className={styles.logoutBtn}>
-            Odhlásit
+            Odhlasit
           </button>
         </form>
-      </nav>
+      </div>
 
-      <main className={styles.main}>{children}</main>
+      {/* ===== BODY: sidebar + main ===== */}
+      <div className={styles.bodyWrapper}>
+        {/* Left sidebar - units overview */}
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarTitle}>
+            {city ? city.jmeno : 'Zadne mesto'}
+          </div>
 
-      <div className={styles.resourceBar}>
-        <div className={styles.resourceItem}>
-          <span className={styles.resourceIcon}>🧱</span>
-          <div className={styles.resourceInfo}>
-            <span className={styles.resourceLabel}>Stavební materiál</span>
-            <span className={styles.resourceValue}>
-              {resources ? resources.s1.toLocaleString('cs-CZ') : '—'}
-            </span>
-            {cityForProd && (
-              <span className={styles.resourceProd}>
-                +{produkce(cityForProd.b2).toLocaleString('cs-CZ')}/h
-              </span>
-            )}
-          </div>
-        </div>
-        <div className={styles.resourceItem}>
-          <span className={styles.resourceIcon}>⚙️</span>
-          <div className={styles.resourceInfo}>
-            <span className={styles.resourceLabel}>Železo</span>
-            <span className={styles.resourceValue}>
-              {resources ? resources.s2.toLocaleString('cs-CZ') : '—'}
-            </span>
-            {cityForProd && (
-              <span className={styles.resourceProd}>
-                +{produkce(cityForProd.b3).toLocaleString('cs-CZ')}/h
-              </span>
-            )}
-          </div>
-        </div>
-        <div className={styles.resourceItem}>
-          <span className={styles.resourceIcon}>🛢️</span>
-          <div className={styles.resourceInfo}>
-            <span className={styles.resourceLabel}>Ropa</span>
-            <span className={styles.resourceValue}>
-              {resources ? resources.s3.toLocaleString('cs-CZ') : '—'}
-            </span>
-            {cityForProd && (
-              <span className={styles.resourceProd}>
-                +{produkce(cityForProd.b4).toLocaleString('cs-CZ')}/h
-              </span>
-            )}
-          </div>
-        </div>
-        <div className={styles.resourceItem}>
-          <span className={styles.resourceIcon}>🌾</span>
-          <div className={styles.resourceInfo}>
-            <span className={styles.resourceLabel}>Jídlo</span>
-            <span className={styles.resourceValue}>
-              {resources ? resources.s4.toLocaleString('cs-CZ') : '—'}
-            </span>
-            {cityForProd && (
-              <span className={styles.resourceProd}>
-                +{produkce(cityForProd.b5).toLocaleString('cs-CZ')}/h
-              </span>
-            )}
-          </div>
-        </div>
+          <div className={styles.sidebarTitle}>Jednotky</div>
+          {unitEntries.length === 0 ? (
+            <div className={styles.sidebarEmpty}>Zadne jednotky</div>
+          ) : (
+            unitEntries.map((u) => (
+              <div key={u.id} className={styles.sidebarUnit}>
+                <span className={styles.sidebarUnitName}>
+                  {u.emoji} {u.name}
+                </span>
+                <span className={styles.sidebarUnitCount}>{u.count}</span>
+              </div>
+            ))
+          )}
+
+          {resources && (
+            <div className={styles.sidebarResources}>
+              <div className={styles.sidebarTitle}>Suroviny</div>
+              <div className={styles.sidebarResItem}>
+                <span className={styles.sidebarResName}>Material</span>
+                <span className={styles.sidebarResValue}>
+                  {resources.s1.toLocaleString('cs-CZ')}
+                </span>
+              </div>
+              <div className={styles.sidebarResItem}>
+                <span className={styles.sidebarResName}>Zelezo</span>
+                <span className={styles.sidebarResValue}>
+                  {resources.s2.toLocaleString('cs-CZ')}
+                </span>
+              </div>
+              <div className={styles.sidebarResItem}>
+                <span className={styles.sidebarResName}>Ropa</span>
+                <span className={styles.sidebarResValue}>
+                  {resources.s3.toLocaleString('cs-CZ')}
+                </span>
+              </div>
+              <div className={styles.sidebarResItem}>
+                <span className={styles.sidebarResName}>Jidlo</span>
+                <span className={styles.sidebarResValue}>
+                  {resources.s4.toLocaleString('cs-CZ')}
+                </span>
+              </div>
+              <div className={styles.sidebarResItem}>
+                <span className={styles.sidebarResName}>Sklad</span>
+                <span className={styles.sidebarResValue}>
+                  {resources.sklad.toLocaleString('cs-CZ')}
+                </span>
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {/* Main content area */}
+        <main className={styles.main}>
+          <div className={styles.contentInner}>{children}</div>
+        </main>
       </div>
     </div>
   );

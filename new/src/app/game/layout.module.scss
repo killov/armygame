@@ -1,170 +1,272 @@
+/* ===== PHP-style military RTS layout ===== */
+
 .gameLayout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #0d1117;
-  color: #c9d1d9;
-  font-family: var(--font-geist-sans), sans-serif;
+  background: transparent;
+  color: #e0e0e0;
+  font-family: 'Noto Sans', sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
-/* ===== Navigation ===== */
-.nav {
+/* ===== Top Bar (38px, gradient) ===== */
+.topBar {
   display: flex;
   align-items: center;
-  gap: 0;
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
-  padding: 0 1.5rem;
-  height: 56px;
+  height: 38px;
+  background: linear-gradient(to bottom, #555555, #333333);
+  border-bottom: 1px solid #222;
+  padding: 0 10px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .logo {
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #d4a017;
+  color: #FF6600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-right: 2rem;
+  margin-right: 15px;
   text-decoration: none;
+  white-space: nowrap;
 
   &:hover {
-    color: #f0c040;
+    color: #ff8833;
+    text-decoration: none;
   }
 }
 
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  flex: 1;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .navLink {
-  color: #8b949e;
+  color: #FF6600;
   text-decoration: none;
-  padding: 0.5rem 0.85rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 4px 10px;
+  font-size: 0.8rem;
   font-weight: 500;
+  border-radius: 3px;
   transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
 
   &:hover {
-    color: #c9d1d9;
-    background: #21262d;
+    color: #ff8833;
+    background: rgba(255, 255, 255, 0.08);
+    text-decoration: none;
   }
+}
 
-  &.active {
-    color: #d4a017;
-    background: #21262d;
-  }
+.navSeparator {
+  color: #666;
+  margin: 0 2px;
+  font-size: 0.75rem;
+}
+
+/* ===== Resource badges in top bar ===== */
+.topResources {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.resourceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #cccfff;
+  border: 2px solid #bbb;
+  border-radius: 5px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  color: #222;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.resourceBadgeIcon {
+  font-size: 0.8rem;
+}
+
+.resourceBadgeValue {
+  color: #333;
+  font-weight: 700;
+}
+
+.resourceBadgeProd {
+  color: forestgreen;
+  font-size: 0.65rem;
+  font-weight: 500;
 }
 
 .logoutBtn {
   background: none;
-  border: 1px solid #30363d;
-  color: #8b949e;
-  padding: 0.4rem 0.85rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border: 1px solid #666;
+  color: #ccc;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
-  margin-left: auto;
 
   &:hover {
     color: #f85149;
     border-color: #f85149;
-    background: rgba(248, 81, 73, 0.08);
+    background: rgba(248, 81, 73, 0.1);
   }
+}
+
+/* ===== Body: sidebar + main ===== */
+.bodyWrapper {
+  display: flex;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Left Sidebar (200px) ===== */
+.sidebar {
+  width: 200px;
+  min-width: 200px;
+  background: linear-gradient(to bottom, rgba(136, 136, 136, 0.92), rgba(170, 170, 170, 0.92), rgba(153, 153, 153, 0.92));
+  border-right: 1px solid #666;
+  padding: 8px;
+  overflow-y: auto;
+  color: #222;
+  font-size: 0.8rem;
+  position: relative;
+  z-index: 10;
+}
+
+.sidebarTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #333;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #777;
+  letter-spacing: 0.05em;
+}
+
+.sidebarUnit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.78rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.sidebarUnitName {
+  color: #222;
+  font-weight: 500;
+}
+
+.sidebarUnitCount {
+  color: #333;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 0.75rem;
+}
+
+.sidebarEmpty {
+  color: #555;
+  font-style: italic;
+  padding: 6px;
+  font-size: 0.78rem;
+}
+
+.sidebarResources {
+  margin-top: 8px;
+}
+
+.sidebarResItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.78rem;
+}
+
+.sidebarResName {
+  color: #333;
+}
+
+.sidebarResValue {
+  color: #222;
+  font-weight: 700;
 }
 
 /* ===== Main content ===== */
 .main {
   flex: 1;
-  padding: 1.5rem;
+  background: rgba(20, 20, 20, 0.7);
+  color: #e0e0e0;
+  padding: 0;
   overflow-y: auto;
+  min-height: calc(100vh - 38px);
+  position: relative;
+  z-index: 1;
 }
 
-/* ===== Resource bar ===== */
-.resourceBar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  background: #161b22;
-  border-top: 1px solid #30363d;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.4);
+.contentInner {
+  background: rgba(240, 240, 240, 0.95);
+  color: #222;
+  padding: 12px 16px;
+  min-height: 100%;
+  box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.15);
+  margin: 8px;
+  border-radius: 3px;
 }
 
-.resourceItem {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 1rem;
-  border-right: 1px solid #30363d;
-
-  &:last-child {
-    border-right: none;
-  }
-}
-
-.resourceIcon {
-  font-size: 1.4rem;
-  line-height: 1;
-}
-
-.resourceInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.resourceLabel {
-  font-size: 0.7rem;
-  color: #8b949e;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.resourceValue {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #d4a017;
-}
-
-.resourceProd {
-  font-size: 0.7rem;
-  color: #3fb950;
-}
-
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .nav {
-    padding: 0 0.75rem;
+  .topBar {
     flex-wrap: wrap;
     height: auto;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    gap: 0.5rem;
+    padding: 4px 8px;
+    gap: 4px;
   }
 
-  .navLinks {
+  .topResources {
     flex-wrap: wrap;
-    gap: 0.2rem;
+    gap: 3px;
   }
 
-  .resourceBar {
-    grid-template-columns: repeat(2, 1fr);
+  .bodyWrapper {
+    flex-direction: column;
   }
 
-  .resourceItem:nth-child(2) {
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    max-height: 150px;
     border-right: none;
+    border-bottom: 1px solid #666;
   }
 
-  .resourceItem:nth-child(3) {
-    border-right: 1px solid #30363d;
+  .contentInner {
+    margin: 4px;
   }
 }

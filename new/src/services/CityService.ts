@@ -239,7 +239,11 @@ export class CityService {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const dokonceni = now + buildTime;
+    // Chain from last pending building's completion time
+    const lastCompletion = buildQueue.length > 0
+      ? Math.max(...buildQueue.map(p => p.dokonceni))
+      : now;
+    const dokonceni = lastCompletion + buildTime;
 
     // Odečti suroviny
     await this.mestoRepo.update(mestoId, {

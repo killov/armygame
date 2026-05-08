@@ -41,10 +41,10 @@ model cesta {
   target_y Int
   cesta    String @db.Text
 
-  @@index([start_x])
-  @@index([start_y])
-  @@index([target_x])
-  @@index([target_y])
+  @@index([start_x], map: "start_x")
+  @@index([start_y], map: "start_y")
+  @@index([target_x], map: "target_x")
+  @@index([target_y], map: "target_y")
 }
 
 model chat {
@@ -67,11 +67,11 @@ model mapa {
   hranice Int
   dom     Int
 
-  @@index([blokx])
-  @@index([bloky])
-  @@index([x])
-  @@index([y])
-  @@index([typ])
+  @@index([blokx], map: "blokx")
+  @@index([bloky], map: "bloky")
+  @@index([typ], map: "typ")
+  @@index([x], map: "x")
+  @@index([y], map: "y")
 }
 
 model mapa_bloky {
@@ -80,8 +80,8 @@ model mapa_bloky {
   y     Int
   verze Int
 
-  @@index([x])
-  @@index([y])
+  @@index([x], map: "x")
+  @@index([y], map: "y")
 }
 
 model mesto {

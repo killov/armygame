@@ -10,6 +10,7 @@ import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
+import Link from 'next/link';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
@@ -113,15 +114,17 @@ export default async function BudovyPage() {
 
           return (
             <div key={id} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardIcon}>{BUDOVA_IKONY[id] ?? '🏗️'}</span>
-                <div>
-                  <div className={styles.cardName}>{b.nazev}</div>
-                  <div className={styles.cardLevel}>
-                    Level {level} / {b.maximum}
+              <Link href={`/game/budovy/${id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className={styles.cardHeader} style={{ cursor: 'pointer', flex: 1 }}>
+                  <span className={styles.cardIcon}>{BUDOVA_IKONY[id] ?? '🏗️'}</span>
+                  <div>
+                    <div className={styles.cardName}>{b.nazev}</div>
+                    <div className={styles.cardLevel}>
+                      Level {level} / {b.maximum}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               <div className={styles.cardInfo}>
                 {cost && (

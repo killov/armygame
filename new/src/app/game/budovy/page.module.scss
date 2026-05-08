@@ -1,58 +1,65 @@
+/* Budovy page - PHP-style */
+
 .page {
   max-width: 1100px;
   margin: 0 auto;
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #f0c040;
-  margin-bottom: 1.5rem;
+  color: #333;
+  margin-bottom: 12px;
+  padding: 4px 8px;
+  background: linear-gradient(to bottom, #bebebe, #dddddd);
+  border: 1px solid #aaa;
+  border-radius: 3px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
 }
 
 .card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  padding: 1.25rem;
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid #555;
+  border-radius: 5px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 4px;
+  color: #ddd;
 }
 
 .cardHeader {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 8px;
 }
 
 .cardIcon {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
 }
 
 .cardName {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #c9d1d9;
+  color: #FF6600;
 }
 
 .cardLevel {
-  font-size: 0.85rem;
-  color: #8b949e;
+  font-size: 0.8rem;
+  color: #aaa;
 }
 
 .cardInfo {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.85rem;
-  color: #8b949e;
+  gap: 2px;
+  font-size: 0.82rem;
+  color: #bbb;
 }
 
 .cardInfoRow {
@@ -61,81 +68,77 @@
 }
 
 .cardInfoLabel {
-  color: #8b949e;
+  color: #999;
 }
 
 .cardInfoValue {
-  color: #c9d1d9;
+  color: #ddd;
   font-weight: 500;
 }
 
 .req {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #f85149;
 }
 
 .reqOk {
-  font-size: 0.8rem;
-  color: #3fb950;
+  font-size: 0.78rem;
+  color: #66bb6a;
 }
 
 .upgradeBtn {
-  background: #d4a017;
-  color: #0d1117;
-  border: none;
-  padding: 0.4rem 0.85rem;
-  border-radius: 6px;
+  background: forestgreen;
+  color: cornsilk;
+  border: 1px solid #2a6e2a;
+  padding: 4px 12px;
+  border-radius: 3px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s;
   align-self: flex-start;
-  margin-top: 0.25rem;
+  margin-top: 4px;
 
   &:hover {
-    background: #f0c040;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
+    background: goldenrod;
+    color: #222;
   }
 
   &:disabled {
-    background: #30363d;
-    color: #8b949e;
+    background: #555;
+    color: #888;
     cursor: not-allowed;
-    transform: none;
+    border-color: #666;
   }
 }
 
 .maxBadge {
   display: inline-block;
-  background: #3fb950;
-  color: #0d1117;
+  background: forestgreen;
+  color: cornsilk;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.78rem;
   align-self: flex-start;
-  margin-top: 0.25rem;
+  margin-top: 4px;
 }
 
 .levelBadge {
   display: inline-block;
-  background: #21262d;
-  color: #d4a017;
+  background: rgba(255, 255, 255, 0.1);
+  color: #FF6600;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.85rem;
 }
 
 .noCity {
   text-align: center;
-  padding: 3rem;
-  color: #8b949e;
-  font-size: 1.1rem;
+  padding: 40px;
+  color: #888;
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {

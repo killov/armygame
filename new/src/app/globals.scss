@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -5,7 +7,17 @@
 }
 
 body {
-  font-family: var(--font-geist-sans), sans-serif;
-  background: #e9ecef;
-  color: #212529;
+  font-family: 'Noto Sans', sans-serif;
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+a {
+  color: #FF6600;
+  text-decoration: none;
+
+  &:hover {
+    color: #ff8833;
+    text-decoration: underline;
+  }
 }
