@@ -1,25 +1,42 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.scss';
 import { fetchMapData, MapCity, MapData } from '@/app/actions/mapa';
 import { sendAttackAction } from '@/app/actions/battle';
 
-const GRID_SIZE = 20;
-const MAP_MAX = 999;
+const CELL_SIZE = 30;
+const MAP_SIZE = 1000;
+const MIN_ZOOM = 0.3;
+const MAX_ZOOM = 4;
+const ZOOM_STEP = 1.15;
 
 export default function MapaPage() {
   const router = useRouter();
   const [data, setData] = useState<MapData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewX, setViewX] = useState(0);
-  const [viewY, setViewY] = useState(0);
-  const [hoveredCity, setHoveredCity] = useState<MapCity | null>(null);
+
+  // Pan & zoom state
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+
+  // Drag state (refs for performance - no re-render during drag)
+  const dragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const offsetAtDragStart = useRef({ x: 0, y: 0 });
+  const hasDragged = useRef(false);
+
+  // UI state
+  const [selectedCity, setSelectedCity] = useState<MapCity | null>(null);
   const [attackTarget, setAttackTarget] = useState<MapCity | null>(null);
   const [attackUnits, setAttackUnits] = useState<Record<number, number>>({});
   const [attackMsg, setAttackMsg] = useState('');
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Load data
   useEffect(() => {
     fetchMapData().then((result) => {
       if (!result) {
@@ -27,18 +44,370 @@ export default function MapaPage() {
         return;
       }
       setData(result);
-      if (result.myCity) {
-        setViewX(Math.max(0, Math.min(MAP_MAX - GRID_SIZE + 1, result.myCity.x - Math.floor(GRID_SIZE / 2))));
-        setViewY(Math.max(0, Math.min(MAP_MAX - GRID_SIZE + 1, result.myCity.y - Math.floor(GRID_SIZE / 2))));
-      }
       setLoading(false);
     });
   }, [router]);
 
-  const move = useCallback((dx: number, dy: number) => {
-    setViewX((prev) => Math.max(0, Math.min(MAP_MAX - GRID_SIZE + 1, prev + dx)));
-    setViewY((prev) => Math.max(0, Math.min(MAP_MAX - GRID_SIZE + 1, prev + dy)));
+  // Center on own city once data loads
+  useEffect(() => {
+    if (!data?.myCity || !containerRef.current) return;
+    const container = containerRef.current;
+    const cx = data.myCity.x * CELL_SIZE + CELL_SIZE / 2;
+    const cy = data.myCity.y * CELL_SIZE + CELL_SIZE / 2;
+    setOffset({
+      x: container.clientWidth / 2 - cx,
+      y: container.clientHeight / 2 - cy,
+    });
+  }, [data]);
+
+  // Draw canvas
+  const drawMap = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container || !data) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = '#0a0f0a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Compute visible cell range
+    const cellPx = CELL_SIZE * zoom;
+    const startCol = Math.max(0, Math.floor(-offset.x / cellPx));
+    const startRow = Math.max(0, Math.floor(-offset.y / cellPx));
+    const endCol = Math.min(MAP_SIZE, Math.ceil((w - offset.x) / cellPx));
+    const endRow = Math.min(MAP_SIZE, Math.ceil((h - offset.y) / cellPx));
+
+    // Grid lines (only when zoomed in enough)
+    if (zoom >= 0.5) {
+      ctx.strokeStyle = 'rgba(48, 54, 61, 0.4)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+
+      // Determine grid spacing - skip lines at low zoom
+      let step = 1;
+      if (zoom < 0.8) step = 5;
+      if (zoom < 0.5) step = 10;
+
+      const gridStartCol = Math.ceil(startCol / step) * step;
+      const gridStartRow = Math.ceil(startRow / step) * step;
+
+      for (let col = gridStartCol; col <= endCol; col += step) {
+        const x = offset.x + col * cellPx;
+        ctx.moveTo(x, Math.max(0, offset.y + startRow * cellPx));
+        ctx.lineTo(x, Math.min(h, offset.y + endRow * cellPx));
+      }
+      for (let row = gridStartRow; row <= endRow; row += step) {
+        const y = offset.y + row * cellPx;
+        ctx.moveTo(Math.max(0, offset.x + startCol * cellPx), y);
+        ctx.lineTo(Math.min(w, offset.x + endCol * cellPx), y);
+      }
+      ctx.stroke();
+    }
+
+    // Coordinate labels on axes (when zoomed in enough)
+    if (zoom >= 1.5) {
+      ctx.fillStyle = 'rgba(139, 148, 158, 0.5)';
+      ctx.font = `${Math.max(8, 10 * zoom)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      let labelStep = 1;
+      if (zoom < 2) labelStep = 5;
+
+      const labelStartCol = Math.ceil(startCol / labelStep) * labelStep;
+      for (let col = labelStartCol; col <= endCol; col += labelStep) {
+        const x = offset.x + col * cellPx + cellPx / 2;
+        const y = Math.max(2, offset.y);
+        if (x > 0 && x < w) {
+          ctx.fillText(String(col), x, y);
+        }
+      }
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const labelStartRow = Math.ceil(startRow / labelStep) * labelStep;
+      for (let row = labelStartRow; row <= endRow; row += labelStep) {
+        const x = Math.max(2, offset.x);
+        const y = offset.y + row * cellPx + cellPx / 2;
+        if (y > 0 && y < h) {
+          ctx.fillText(String(row), x, y);
+        }
+      }
+    }
+
+    // Cities - only render those in visible area
+    const { cities, userId } = data;
+    for (const city of cities) {
+      if (city.x < startCol - 1 || city.x > endCol || city.y < startRow - 1 || city.y > endRow) continue;
+
+      const cx = offset.x + city.x * cellPx + cellPx / 2;
+      const cy = offset.y + city.y * cellPx + cellPx / 2;
+
+      const isOwn = city.userId === userId;
+      const isSelected = selectedCity?.id === city.id;
+      const isAttackTarget = attackTarget?.id === city.id;
+
+      // Glow
+      const radius = Math.max(4, 6 * zoom);
+      const glowRadius = radius * 2.5;
+
+      const gradient = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, glowRadius);
+      if (isOwn) {
+        gradient.addColorStop(0, 'rgba(35, 134, 54, 0.6)');
+        gradient.addColorStop(1, 'rgba(35, 134, 54, 0)');
+      } else {
+        gradient.addColorStop(0, 'rgba(31, 111, 235, 0.6)');
+        gradient.addColorStop(1, 'rgba(31, 111, 235, 0)');
+      }
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // City dot
+      ctx.fillStyle = isOwn ? '#3fb950' : '#58a6ff';
+      if (isSelected || isAttackTarget) {
+        ctx.fillStyle = isAttackTarget ? '#f85149' : '#ffa657';
+      }
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Selection ring
+      if (isSelected || isAttackTarget) {
+        ctx.strokeStyle = isAttackTarget ? '#f85149' : '#ffa657';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 3, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // City name label (when zoomed in enough)
+      if (zoom >= 0.8) {
+        ctx.fillStyle = '#c9d1d9';
+        ctx.font = `${Math.max(9, 11 * zoom)}px sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(city.jmeno, cx + radius + 4, cy);
+      }
+    }
+
+    // Map border
+    const mapW = MAP_SIZE * cellPx;
+    const mapH = MAP_SIZE * cellPx;
+    ctx.strokeStyle = 'rgba(88, 166, 255, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(offset.x, offset.y, mapW, mapH);
+
+  }, [data, offset, zoom, selectedCity, attackTarget]);
+
+  // Redraw on any relevant change
+  useEffect(() => {
+    drawMap();
+  }, [drawMap]);
+
+  // Resize observer
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => drawMap());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [drawMap]);
+
+  // --- Mouse event handlers ---
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    dragging.current = true;
+    hasDragged.current = false;
+    dragStart.current = { x: e.clientX, y: e.clientY };
+    offsetAtDragStart.current = { ...offset };
+    e.preventDefault();
+  }, [offset]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragging.current) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      hasDragged.current = true;
+    }
+    setOffset({
+      x: offsetAtDragStart.current.x + dx,
+      y: offsetAtDragStart.current.y + dy,
+    });
   }, []);
+
+  const handleMouseUp = useCallback(() => {
+    dragging.current = false;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    dragging.current = false;
+  }, []);
+
+  // Click to select city
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    if (hasDragged.current) return;
+    if (!data || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const cellPx = CELL_SIZE * zoom;
+    const mapX = (mx - offset.x) / cellPx;
+    const mapY = (my - offset.y) / cellPx;
+
+    // Find closest city within click tolerance
+    const tolerance = Math.max(10, 8 / zoom);
+    let closest: MapCity | null = null;
+    let closestDist = Infinity;
+
+    for (const city of data.cities) {
+      const cx = city.x + 0.5;
+      const cy = city.y + 0.5;
+      const dist = Math.sqrt((mapX - cx) ** 2 + (mapY - cy) ** 2);
+      if (dist < tolerance && dist < closestDist) {
+        closest = city;
+        closestDist = dist;
+      }
+    }
+
+    if (closest) {
+      setSelectedCity(closest);
+    } else {
+      setSelectedCity(null);
+      setAttackTarget(null);
+    }
+  }, [data, zoom, offset]);
+
+  // Wheel to zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+    const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom * factor));
+
+    // Zoom towards cursor
+    const scale = newZoom / zoom;
+    setOffset((prev) => ({
+      x: mx - (mx - prev.x) * scale,
+      y: my - (my - prev.y) * scale,
+    }));
+    setZoom(newZoom);
+  }, [zoom]);
+
+  // --- Touch event handlers ---
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const touchPinchDist = useRef<number | null>(null);
+  const touchZoomStart = useRef<number>(1);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      dragging.current = true;
+      hasDragged.current = false;
+      const t = e.touches[0];
+      dragStart.current = { x: t.clientX, y: t.clientY };
+      offsetAtDragStart.current = { ...offset };
+      touchStart.current = { x: t.clientX, y: t.clientY };
+    } else if (e.touches.length === 2) {
+      dragging.current = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      touchPinchDist.current = Math.sqrt(dx * dx + dy * dy);
+      touchZoomStart.current = zoom;
+    }
+  }, [offset, zoom]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && dragging.current) {
+      const t = e.touches[0];
+      const dx = t.clientX - dragStart.current.x;
+      const dy = t.clientY - dragStart.current.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        hasDragged.current = true;
+      }
+      setOffset({
+        x: offsetAtDragStart.current.x + dx,
+        y: offsetAtDragStart.current.y + dy,
+      });
+    } else if (e.touches.length === 2 && touchPinchDist.current !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const scale = dist / touchPinchDist.current;
+      const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, touchZoomStart.current * scale));
+      setZoom(newZoom);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    dragging.current = false;
+    touchPinchDist.current = null;
+  }, []);
+
+  // Center on my city
+  const centerOnMyCity = useCallback(() => {
+    if (!data?.myCity || !containerRef.current) return;
+    const container = containerRef.current;
+    const cellPx = CELL_SIZE * zoom;
+    const cx = data.myCity.x * cellPx + cellPx / 2;
+    const cy = data.myCity.y * cellPx + cellPx / 2;
+    setOffset({
+      x: container.clientWidth / 2 - cx,
+      y: container.clientHeight / 2 - cy,
+    });
+  }, [data, zoom]);
+
+  // Current center coordinates
+  const getCenterCoords = useCallback(() => {
+    if (!containerRef.current) return { x: 0, y: 0 };
+    const container = containerRef.current;
+    const cellPx = CELL_SIZE * zoom;
+    return {
+      x: Math.round((container.clientWidth / 2 - offset.x) / cellPx),
+      y: Math.round((container.clientHeight / 2 - offset.y) / cellPx),
+    };
+  }, [offset, zoom]);
+
+  // Attack form submit
+  const handleAttackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!data?.myCity || !attackTarget) return;
+    setAttackMsg('');
+    const result = await sendAttackAction(data.myCity.id, attackTarget.id, attackUnits);
+    if (result.success) {
+      setAttackMsg('Utok vyslan!');
+      setAttackTarget(null);
+      setAttackUnits({});
+    } else {
+      setAttackMsg(result.error || 'Chyba pri utoku');
+    }
+  };
 
   if (loading) {
     return <div className={styles.page}><p style={{ color: '#8b949e' }}>Nacitam mapu...</p></div>;
@@ -46,216 +415,113 @@ export default function MapaPage() {
 
   if (!data) return null;
 
-  const { cities, myCity, userId } = data;
-
-  // Build lookup for cities in current viewport
-  const cityGrid = new Map<string, MapCity>();
-  const visibleCities: MapCity[] = [];
-  for (const city of cities) {
-    const gx = city.x - viewX;
-    const gy = city.y - viewY;
-    if (gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < GRID_SIZE) {
-      cityGrid.set(`${gy}-${gx}`, city);
-      visibleCities.push(city);
-    }
-  }
-
-  const handleAttackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!myCity || !attackTarget) return;
-    setAttackMsg('');
-    const result = await sendAttackAction(myCity.id, attackTarget.id, attackUnits);
-    if (result.success) {
-      setAttackMsg('Utok vyslán!');
-      setAttackTarget(null);
-      setAttackUnits({});
-    } else {
-      setAttackMsg(result.error || 'Chyba pri utoky');
-    }
-  };
+  const center = getCenterCoords();
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Mapa sveta</h1>
+      {/* Map viewport */}
+      <div
+        ref={containerRef}
+        className={styles.mapViewport}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleCanvasClick}
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <canvas ref={canvasRef} className={styles.mapCanvas} />
 
-      <div className={styles.mapContainer}>
-        <div>
-          {/* Navigation buttons */}
-          <div className={styles.navButtons}>
-            <button className={styles.navBtn} onClick={() => move(0, -10)}>N</button>
+        {/* HUD overlay */}
+        <div className={styles.hud}>
+          <div className={styles.hudCoords}>
+            Stred: ({center.x}, {center.y}) | Zoom: {zoom.toFixed(1)}x
           </div>
-          <div className={styles.navRow}>
-            <button className={styles.navBtn} onClick={() => move(-10, 0)}>W</button>
-            <div className={styles.grid}>
-              {Array.from({ length: GRID_SIZE }, (_, row) =>
-                Array.from({ length: GRID_SIZE }, (_, col) => {
-                  const key = `${row}-${col}`;
-                  const city = cityGrid.get(key);
-                  const isOwn = city ? city.userId === userId : false;
-
-                  let cellClass = styles.cell;
-                  if (city) cellClass += ` ${isOwn ? styles.myCity : styles.cityCell}`;
-
-                  return (
-                    <div
-                      key={key}
-                      className={cellClass}
-                      onMouseEnter={() => city && setHoveredCity(city)}
-                      onMouseLeave={() => setHoveredCity(null)}
-                      onClick={() => city && !isOwn && setAttackTarget(city)}
-                      title={
-                        city
-                          ? `${city.jmeno} (${city.x},${city.y}) - ${city.userjmeno}`
-                          : `(${viewX + col},${viewY + row})`
-                      }
-                    >
-                      {city && <span className={`${styles.cityDot} ${isOwn ? styles.ownDot : styles.enemyDot}`} />}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            <button className={styles.navBtn} onClick={() => move(10, 0)}>E</button>
+          <div className={styles.hudButtons}>
+            {data.myCity && (
+              <button className={styles.hudBtn} onClick={(e) => { e.stopPropagation(); centerOnMyCity(); }}>
+                Moje mesto
+              </button>
+            )}
+            <button className={styles.hudBtn} onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(MAX_ZOOM, z * ZOOM_STEP)); }}>+</button>
+            <button className={styles.hudBtn} onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(MIN_ZOOM, z / ZOOM_STEP)); }}>-</button>
           </div>
-          <div className={styles.navButtons}>
-            <button className={styles.navBtn} onClick={() => move(0, 10)}>S</button>
-          </div>
-          <div className={styles.coordInfo}>
-            Zobrazeno: ({viewX},{viewY}) - ({viewX + GRID_SIZE - 1},{viewY + GRID_SIZE - 1})
-          </div>
-          <div className={styles.legend}>
-            <div><span className={`${styles.dot} ${styles.myDotLegend}`} /> Moje mesto</div>
-            <div><span className={`${styles.dot} ${styles.cityDotLegend}`} /> Cizi mesto</div>
-            <div><span className={`${styles.dot} ${styles.emptyDot}`} /> Prazdne</div>
+          <div className={styles.hudLegend}>
+            <span><span className={styles.legendDotOwn} /> Moje</span>
+            <span><span className={styles.legendDotEnemy} /> Cizi</span>
           </div>
         </div>
+      </div>
 
+      {/* Info panel - floating on the right */}
+      {(selectedCity || attackTarget) && (
         <div className={styles.infoPanel}>
-          {hoveredCity ? (
-            <div className={styles.myInfo}>
-              <h3>{hoveredCity.jmeno}</h3>
-              <p>Hrac: <strong>{hoveredCity.userjmeno}</strong></p>
-              <p>Pozice: ({hoveredCity.x}, {hoveredCity.y})</p>
-              <p>Stat: {hoveredCity.statjmeno || '—'}</p>
-              <p>Populace: {hoveredCity.populace.toLocaleString('cs-CZ')}</p>
-              {hoveredCity.userId !== userId && (
+          {selectedCity && !attackTarget && (
+            <div className={styles.cityInfo}>
+              <div className={styles.infoPanelHeader}>
+                <h3>{selectedCity.jmeno}</h3>
+                <button className={styles.closeBtn} onClick={() => setSelectedCity(null)}>&times;</button>
+              </div>
+              <p>Hrac: <strong>{selectedCity.userjmeno}</strong></p>
+              <p>Pozice: ({selectedCity.x}, {selectedCity.y})</p>
+              <p>Stat: {selectedCity.statjmeno || '\u2014'}</p>
+              <p>Populace: {selectedCity.populace.toLocaleString('cs-CZ')}</p>
+              {selectedCity.userId !== data.userId && (
                 <button
                   className={styles.attackBtn}
-                  style={{ marginTop: '0.5rem' }}
-                  onClick={() => setAttackTarget(hoveredCity)}
+                  onClick={() => setAttackTarget(selectedCity)}
                 >
                   Zautocit
                 </button>
               )}
             </div>
-          ) : (
-            <p className={styles.infoPanelHint}>Najed mysi na mesto pro detail.</p>
           )}
-          {myCity && (
-            <div className={styles.myInfo} style={{ marginTop: '1rem' }}>
-              <h3>Moje mesto</h3>
-              <p><strong>{myCity.jmeno}</strong></p>
-              <p>Pozice: ({myCity.x}, {myCity.y})</p>
-              <p>Stat: {myCity.statjmeno || '—'}</p>
-              <button
-                className={styles.navBtn}
-                style={{ marginTop: '0.5rem' }}
-                onClick={() => {
-                  setViewX(Math.max(0, Math.min(MAP_MAX - GRID_SIZE + 1, myCity.x - Math.floor(GRID_SIZE / 2))));
-                  setViewY(Math.max(0, Math.min(MAP_MAX - GRID_SIZE + 1, myCity.y - Math.floor(GRID_SIZE / 2))));
-                }}
-              >
-                Centrovat na me mesto
-              </button>
+
+          {attackTarget && data.myCity && (
+            <div className={styles.cityInfo}>
+              <div className={styles.infoPanelHeader}>
+                <h3>Utok: {attackTarget.jmeno}</h3>
+                <button className={styles.closeBtn} onClick={() => { setAttackTarget(null); setAttackMsg(''); }}>&times;</button>
+              </div>
+              <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+                {attackTarget.userjmeno} ({attackTarget.x}, {attackTarget.y})
+              </p>
+              <form onSubmit={handleAttackSubmit}>
+                <div className={styles.unitsGrid}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+                    const available = (data.myCity as unknown as Record<string, number>)[`j${i}`] ?? 0;
+                    return (
+                      <div key={i} className={styles.unitInput}>
+                        <label>j{i}:</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={available}
+                          value={attackUnits[i] || 0}
+                          onChange={(ev) =>
+                            setAttackUnits((prev) => ({ ...prev, [i]: Number(ev.target.value) || 0 }))
+                          }
+                          className={styles.smallInput}
+                        />
+                        <span>/{available}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className={styles.attackActions}>
+                  <button type="submit" className={styles.attackBtn}>Zautocit</button>
+                  {attackMsg && (
+                    <span style={{ color: attackMsg.includes('Chyba') ? '#f85149' : '#3fb950', fontSize: '0.85rem' }}>
+                      {attackMsg}
+                    </span>
+                  )}
+                </div>
+              </form>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Visible cities table */}
-      <div className={styles.cityList}>
-        <h2 className={styles.sectionTitle}>Mesta v zobrazeni ({visibleCities.length})</h2>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Nazev</th>
-                <th>Vlastnik</th>
-                <th>Pozice</th>
-                <th>Stat</th>
-                <th>Populace</th>
-                <th>Akce</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleCities.map((city) => {
-                const isOwn = city.userId === userId;
-                return (
-                  <tr key={city.id} className={isOwn ? styles.ownRow : undefined}>
-                    <td>{city.jmeno}</td>
-                    <td>{city.userjmeno}</td>
-                    <td>({city.x}, {city.y})</td>
-                    <td>{city.statjmeno || '—'}</td>
-                    <td>{city.populace.toLocaleString('cs-CZ')}</td>
-                    <td>
-                      {!isOwn && (
-                        <button
-                          className={styles.attackBtnSmall}
-                          onClick={() => setAttackTarget(city)}
-                        >
-                          Zautocit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Attack form */}
-      {attackTarget && myCity && (
-        <div className={styles.attackSection}>
-          <h2>Utok na: {attackTarget.jmeno} ({attackTarget.userjmeno})</h2>
-          <p style={{ color: '#8b949e', marginBottom: '1rem' }}>
-            Pozice: ({attackTarget.x}, {attackTarget.y})
-          </p>
-          <form onSubmit={handleAttackSubmit}>
-            <div className={styles.unitsGrid}>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
-                const available = (myCity as unknown as Record<string, number>)[`j${i}`] ?? 0;
-                return (
-                  <div key={i} className={styles.unitInput}>
-                    <label>j{i}:</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max={available}
-                      value={attackUnits[i] || 0}
-                      onChange={(e) =>
-                        setAttackUnits((prev) => ({ ...prev, [i]: Number(e.target.value) || 0 }))
-                      }
-                      className={styles.smallInput}
-                    />
-                    <span>/{available}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <button type="submit" className={styles.attackBtn}>Zautocit</button>
-              <button
-                type="button"
-                className={styles.navBtn}
-                onClick={() => { setAttackTarget(null); setAttackMsg(''); }}
-              >
-                Zrusit
-              </button>
-              {attackMsg && <span style={{ color: attackMsg.includes('Chyba') ? '#f85149' : '#3fb950' }}>{attackMsg}</span>}
-            </div>
-          </form>
         </div>
       )}
     </div>

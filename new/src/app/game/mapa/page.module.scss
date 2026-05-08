@@ -1,94 +1,211 @@
-.page { max-width: 1200px; margin: 0 auto; }
-
-.title { color: #c9d1d9; font-size: 1.5rem; margin-bottom: 1.5rem; }
-
-.mapContainer { display: flex; gap: 2rem; margin-bottom: 2rem; }
-
-.navButtons { display: flex; justify-content: center; margin: 0.25rem 0; }
-.navRow { display: flex; align-items: center; gap: 0.25rem; }
-.navBtn {
-  background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.3rem 0.75rem;
-  border-radius: 4px; cursor: pointer; font-size: 0.8rem;
-  &:hover { background: #30363d; }
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(20, 24px);
-  grid-template-rows: repeat(20, 24px);
-  gap: 1px;
-  background: #21262d;
-  border: 1px solid #30363d;
-}
-
-.cell {
-  width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-  background: #0d1117; cursor: default;
+.page {
   position: relative;
-  &:hover { background: #161b22; }
+  width: 100%;
+  height: calc(100vh - 38px);
+  overflow: hidden;
+  background: #0a0f0a;
 }
 
-.cityCell {
-  background: #0d1117;
+/* ---- Map viewport (full area) ---- */
+.mapViewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.mapCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+/* ---- HUD overlay ---- */
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hudCoords {
+  background: rgba(13, 17, 23, 0.85);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #8b949e;
+  font-size: 0.8rem;
+  font-family: monospace;
+  pointer-events: auto;
+}
+
+.hudButtons {
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.hudBtn {
+  background: rgba(33, 38, 45, 0.9);
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 5px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  &:hover { background: #1c2333; }
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #30363d;
+  }
 }
-.myCity {
+
+.hudLegend {
+  display: flex;
+  gap: 12px;
+  background: rgba(13, 17, 23, 0.85);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  color: #8b949e;
+  pointer-events: auto;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.legendDotOwn,
+.legendDotEnemy {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legendDotOwn {
+  background: #3fb950;
+  box-shadow: 0 0 4px #3fb950;
+}
+
+.legendDotEnemy {
+  background: #58a6ff;
+  box-shadow: 0 0 4px #58a6ff;
+}
+
+/* ---- Floating info panel ---- */
+.infoPanel {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 280px;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.cityInfo {
+  background: rgba(22, 27, 34, 0.95);
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  color: #c9d1d9;
+  backdrop-filter: blur(8px);
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: #58a6ff;
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+  }
+}
+
+.infoPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #8b949e;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+
+  &:hover {
+    color: #c9d1d9;
+  }
+}
+
+/* ---- Attack form ---- */
+.unitsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.unitInput {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.smallInput {
+  width: 45px;
   background: #0d1117;
-  cursor: default;
-  &:hover { background: #1a2a1a; }
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 3px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.8rem;
 }
 
-.cityDot {
-  display: block; width: 10px; height: 10px; border-radius: 50%;
-}
-.ownDot { background: #238636; box-shadow: 0 0 4px #238636; }
-.enemyDot { background: #1f6feb; box-shadow: 0 0 4px #1f6feb; }
-
-.coordInfo { color: #8b949e; font-size: 0.75rem; margin-top: 0.25rem; text-align: center; }
-
-.legend { display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.8rem; color: #8b949e; }
-.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
-.myDotLegend { background: #238636; }
-.cityDotLegend { background: #1f6feb; }
-.emptyDot { background: #21262d; }
-
-.infoPanel { min-width: 220px; }
-.infoPanelHint { color: #8b949e; font-size: 0.85rem; }
-.myInfo {
-  background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; color: #c9d1d9;
-  h3 { margin-bottom: 0.5rem; color: #58a6ff; }
-  p { margin: 0.25rem 0; font-size: 0.9rem; }
+.attackActions {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.cityList { margin-top: 2rem; }
-.sectionTitle { color: #c9d1d9; font-size: 1.1rem; margin-bottom: 1rem; }
-.tableWrapper { overflow-x: auto; }
-.table {
-  width: 100%; border-collapse: collapse; font-size: 0.85rem; color: #c9d1d9;
-  th { background: #161b22; padding: 0.5rem 0.75rem; text-align: left; color: #8b949e; border-bottom: 1px solid #30363d; }
-  td { padding: 0.4rem 0.75rem; border-bottom: 1px solid #21262d; }
-}
-.ownRow { background: #1a2a1a; }
-
-.attackSection {
-  margin-top: 2rem; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem;
-  h2 { color: #c9d1d9; font-size: 1.1rem; margin-bottom: 0.5rem; }
-}
-.formRow {
-  display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
-  label { color: #8b949e; min-width: 150px; }
-}
-.input { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 0.4rem 0.75rem; border-radius: 6px; }
-.unitsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-.unitInput { display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; color: #8b949e; }
-.smallInput { width: 50px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 0.25rem; border-radius: 4px; text-align: center; }
 .attackBtn {
-  background: #da3633; color: #fff; border: none; padding: 0.5rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;
-  &:hover { background: #f85149; }
-}
-.attackBtnSmall {
-  background: #da3633; color: #fff; border: none; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;
-  &:hover { background: #f85149; }
+  background: #da3633;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #f85149;
+  }
 }
