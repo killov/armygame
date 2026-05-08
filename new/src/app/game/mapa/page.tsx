@@ -13,9 +13,18 @@ const MAX_ZOOM = 4;
 const ZOOM_STEP = 1.15;
 const GRASS_COLOR = '#63903D';
 
-// Deterministic terrain type from coords: 0=grass, 1=forest, 2=hills
+// Deterministic pseudo-random terrain from coords (better distribution)
 function terrainType(x: number, y: number): number {
-  return (x * 7 + y * 13) % 3;
+  // Simple hash to avoid visible repetition patterns
+  let h = x * 374761393 + y * 668265263;
+  h = ((h ^ (h >> 13)) * 1274126177) >>> 0;
+  return h % 5; // 0,1 = grass (40%), 2,3 = forest (40%), 4 = hills (20%)
+}
+
+function terrainImage(t: number): 'forest' | 'hills' | null {
+  if (t === 2 || t === 3) return 'forest';
+  if (t === 4) return 'hills';
+  return null; // grass, no image
 }
 
 export default function MapaPage() {
@@ -170,10 +179,10 @@ export default function MapaPage() {
           if (cityHere) {
             img = imgCity;
           } else {
-            const t = terrainType(col, row);
-            if (t === 1) img = imgForest;
-            else if (t === 2) img = imgHills;
-            // t === 0 is plain grass, no image needed
+            const terrain = terrainImage(terrainType(col, row));
+            if (terrain === 'forest') img = imgForest;
+            else if (terrain === 'hills') img = imgHills;
+            // null = plain grass, no image needed
           }
 
           if (img) {
@@ -392,26 +401,42 @@ export default function MapaPage() {
     }
   }, [data, zoom, offset]);
 
-  // Wheel to zoom
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
+  // Wheel zoom refs (to avoid stale closures in native listener)
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  const offsetRef = useRef(offset);
+  offsetRef.current = offset;
 
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+  // Attach native wheel listener with { passive: false } to allow preventDefault
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-    const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom * factor));
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Zoom towards cursor
-    const scale = newZoom / zoom;
-    setOffset((prev) => ({
-      x: mx - (mx - prev.x) * scale,
-      y: my - (my - prev.y) * scale,
-    }));
-    setZoom(newZoom);
-  }, [zoom]);
+      const rect = container.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const currentZoom = zoomRef.current;
+      const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+      const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, currentZoom * factor));
+
+      // Zoom towards cursor
+      const scale = newZoom / currentZoom;
+      const prev = offsetRef.current;
+      setOffset({
+        x: mx - (mx - prev.x) * scale,
+        y: my - (my - prev.y) * scale,
+      });
+      setZoom(newZoom);
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Touch event handlers ---
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -521,7 +546,7 @@ export default function MapaPage() {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         onClick={handleCanvasClick}
-        onWheel={handleWheel}
+
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
