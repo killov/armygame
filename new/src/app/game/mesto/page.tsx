@@ -10,6 +10,7 @@ import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime, produkce, skladKapacita } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
+import { BattleService } from '@/services/BattleService';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
@@ -46,6 +47,10 @@ export default async function MestoPage() {
 
   // 4. Zpracuj dokončené akce
   await cityService.processCompletedActions(city.id);
+
+  // Zpracuj příchozí útoky
+  const battleService = new BattleService(mestoRepo, akceRepo, db);
+  await battleService.processArrivals(city.id);
 
   // 5. Suroviny
   const resources = await cityService.getResources(city.id);

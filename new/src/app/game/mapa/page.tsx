@@ -2,10 +2,12 @@ import 'reflect-metadata';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { revalidatePath } from 'next/cache';
 import styles from './page.module.scss';
 import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { mapa, mesto } from '@prisma/client';
+import { sendAttackAction } from '@/app/actions/battle';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
@@ -43,7 +45,6 @@ export default async function MapaPage() {
   const mestaMap = new Map<number, mesto>(allMesta.map((m) => [m.id, m]));
 
   // Mřížka 20×20 bloků (každý blok = rozsah 10 souřadnic)
-  // col = Math.floor(x / 10), row = Math.floor(y / 10), clamped to 0-19
   type CellCity = { mapRow: mapa; mesto: mesto | null };
   const cellMap = new Map<string, CellCity>();
   for (const mc of mapaCities) {
@@ -53,6 +54,19 @@ export default async function MapaPage() {
     if (!cellMap.has(key)) {
       cellMap.set(key, { mapRow: mc, mesto: mestaMap.get(mc.dom) ?? null });
     }
+  }
+
+  async function sendAttackFormAction(formData: FormData) {
+    'use server';
+    const fromMestoId = Number(formData.get('fromMestoId'));
+    const toMestoId = Number(formData.get('toMestoId'));
+    const units: Record<number, number> = {};
+    for (let i = 1; i <= 8; i++) {
+      const v = Number(formData.get(`j${i}`)) || 0;
+      if (v > 0) units[i] = v;
+    }
+    await sendAttackAction(fromMestoId, toMestoId, units);
+    revalidatePath('/game/mapa');
   }
 
   return (
@@ -139,6 +153,36 @@ export default async function MapaPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className={styles.attackSection}>
+        <h2>Zaútočit na město</h2>
+        <form action={sendAttackFormAction}>
+          <div className={styles.formRow}>
+            <label>Cílové město ID:</label>
+            <input type="number" name="toMestoId" className={styles.input} required />
+          </div>
+          <div className={styles.formRow}>
+            <label>Jednotky (počty):</label>
+            <div className={styles.unitsGrid}>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className={styles.unitInput}>
+                  <label>j{i}:</label>
+                  <input
+                    type="number"
+                    name={`j${i}`}
+                    min="0"
+                    defaultValue="0"
+                    className={styles.smallInput}
+                  />
+                  <span>/{String((myCity as Record<string, unknown>)?.[`j${i}`] ?? 0)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <input type="hidden" name="fromMestoId" value={myCity?.id ?? 0} />
+          <button type="submit" className={styles.attackBtn}>⚔️ Zaútočit</button>
+        </form>
       </div>
     </div>
   );

@@ -94,6 +94,11 @@ export default async function GameLayout({
             </Link>
           </li>
           <li>
+            <Link href="/game/pohyb" className={styles.navLink}>
+              Operace
+            </Link>
+          </li>
+          <li>
             <Link href="/game/profil" className={styles.navLink}>
               Profil
             </Link>

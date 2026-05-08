@@ -1,1 +1,37 @@
 .page { max-width: 1200px; margin: 0 auto; }
+
+.title { color: #c9d1d9; font-size: 1.5rem; margin-bottom: 1.5rem; }
+
+.mapContainer { display: flex; gap: 2rem; margin-bottom: 2rem; }
+
+.grid { display: grid; grid-template-columns: repeat(20, 28px); grid-template-rows: repeat(20, 28px); gap: 1px; background: #21262d; border: 1px solid #30363d; }
+
+.cell { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; background: #0d1117; cursor: default; }
+
+.cityCell { background: #161b22; }
+.myCity { background: #1a2a1a; }
+
+.legend { display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.8rem; color: #8b949e; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+.myDot { background: #238636; }
+.cityDot { background: #1f6feb; }
+.emptyDot { background: #21262d; }
+
+.infoPanel { min-width: 200px; }
+.infoPanelHint { color: #8b949e; font-size: 0.85rem; }
+.myInfo { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; color: #c9d1d9; h3 { margin-bottom: 0.5rem; color: #58a6ff; } p { margin: 0.25rem 0; font-size: 0.9rem; } }
+
+.cityList { margin-top: 2rem; }
+.sectionTitle { color: #c9d1d9; font-size: 1.1rem; margin-bottom: 1rem; }
+.tableWrapper { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: #c9d1d9; th { background: #161b22; padding: 0.5rem 0.75rem; text-align: left; color: #8b949e; border-bottom: 1px solid #30363d; } td { padding: 0.4rem 0.75rem; border-bottom: 1px solid #21262d; } }
+.ownRow { background: #1a2a1a; }
+
+.attackSection { margin-top: 2rem; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; }
+.attackSection h2 { color: #c9d1d9; font-size: 1.1rem; margin-bottom: 1.25rem; }
+.formRow { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; label { color: #8b949e; min-width: 150px; } }
+.input { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 0.4rem 0.75rem; border-radius: 6px; }
+.unitsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.unitInput { display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; color: #8b949e; }
+.smallInput { width: 50px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 0.25rem; border-radius: 4px; text-align: center; }
+.attackBtn { background: #da3633; color: #fff; border: none; padding: 0.5rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; &:hover { background: #f85149; } }
