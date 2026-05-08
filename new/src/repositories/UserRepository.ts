@@ -21,4 +21,12 @@ export class UserRepository {
     async update(id: number, data: Partial<users>): Promise<users> {
         return this.db.client.users.update({ where: { id }, data });
     }
+
+    async updatePenize(id: number, penize: number): Promise<void> {
+        await this.db.client.users.update({ where: { id }, data: { penize } });
+    }
+
+    async updateVyzkum(id: number, vyzkumId: number, level: number): Promise<void> {
+        await this.db.client.users.update({ where: { id }, data: { [`v${vyzkumId}`]: level } });
+    }
 }

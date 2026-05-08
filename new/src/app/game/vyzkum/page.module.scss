@@ -1,0 +1,155 @@
+.page {
+  padding: 1.5rem;
+  color: #e0e0e0;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #a8d8a8;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(100, 200, 100, 0.4);
+}
+
+.wallet {
+  display: inline-block;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 1rem;
+  color: #ffd700;
+
+  strong {
+    color: #ffe44d;
+  }
+}
+
+.activeResearch {
+  background: rgba(60, 100, 60, 0.4);
+  border: 1px solid rgba(100, 180, 100, 0.5);
+  border-radius: 8px;
+  padding: 0.75rem 1.2rem;
+  margin-bottom: 1.5rem;
+  color: #a8d8a8;
+  font-size: 0.95rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+.card {
+  background: rgba(20, 30, 20, 0.85);
+  border: 1px solid rgba(80, 130, 80, 0.4);
+  border-radius: 10px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    border-color: rgba(100, 180, 100, 0.6);
+    box-shadow: 0 0 12px rgba(80, 160, 80, 0.2);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.cardEmoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.cardName {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #c8e6c8;
+}
+
+.cardLevel {
+  font-size: 0.8rem;
+  color: #88aa88;
+}
+
+.progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #2e7d32, #66bb6a);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.cardDesc {
+  font-size: 0.85rem;
+  color: #9ab89a;
+  margin: 0;
+}
+
+.cardCost {
+  font-size: 0.85rem;
+  color: #b0b0b0;
+}
+
+.ok {
+  color: #66bb6a;
+}
+
+.notOk {
+  color: #ef5350;
+}
+
+.req {
+  font-size: 0.8rem;
+  color: #ef5350;
+  margin: 0;
+}
+
+.btn {
+  width: 100%;
+  padding: 0.55rem 1rem;
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #e8f5e9;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  margin-top: auto;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #388e3c, #43a047);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.maxBadge {
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 6px;
+  color: #ffd700;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: auto;
+}

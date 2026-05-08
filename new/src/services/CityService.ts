@@ -1,6 +1,7 @@
 import { component } from "ironbean";
 import { MestoRepository } from "../repositories/MestoRepository";
 import { AkceRepository } from "../repositories/AkceRepository";
+import { UserRepository } from "../repositories/UserRepository";
 import { DatabaseService } from "../db/DatabaseService";
 import { mesto } from "@prisma/client";
 import {
@@ -181,6 +182,25 @@ export class CityService {
       surovina3_produkce: produkce(m.b4),
       surovina4_produkce: produkce(m.b5),
     });
+  }
+
+  /** Aplikuje dokončené výzkumné akce (typ=2) */
+  async processResearchActions(userId: number, mestoId: number): Promise<void> {
+    const completed = await this.akceRepo.getCompletedByMesto(mestoId);
+    for (const akce of completed) {
+      if (akce.typ === 2 && akce.budova != null) {
+        const userRepo = new UserRepository(this.db);
+        const user = await userRepo.getById(userId);
+        if (!user) continue;
+        const key = `v${akce.budova}` as keyof typeof user;
+        const current = (user[key] as number) ?? 0;
+        await this.db.client.users.update({
+          where: { id: userId },
+          data: { [key]: current + 1 },
+        });
+        await this.akceRepo.delete(akce.id);
+      }
+    }
   }
 
   /** Spustí stavbu budovy */
