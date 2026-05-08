@@ -1,0 +1,273 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f0c040;
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ===== Overview table ===== */
+.overviewTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    background: #161b22;
+    color: #8b949e;
+    font-weight: 600;
+    border-bottom: 1px solid #30363d;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #161b22;
+  }
+}
+
+.unitEmoji {
+  font-size: 1.3rem;
+}
+
+.unitCount {
+  font-weight: 700;
+  color: #d4a017;
+}
+
+.noUnits {
+  color: #8b949e;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+/* ===== Training grid ===== */
+.trainGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.trainCard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #484f58;
+  }
+}
+
+.trainCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.25rem;
+}
+
+.trainIcon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.trainName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c9d1d9;
+}
+
+.trainCost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.trainCostItem {
+  background: #21262d;
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+  color: #8b949e;
+
+  strong {
+    color: #c9d1d9;
+  }
+}
+
+.trainCostItemMissing {
+  background: rgba(248, 81, 73, 0.12);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+  color: #f85149;
+  font-size: 0.8rem;
+
+  strong {
+    color: #f85149;
+  }
+}
+
+.trainTimeRow {
+  font-size: 0.8rem;
+  color: #8b949e;
+  display: flex;
+  gap: 0.75rem;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+.trainForm {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  align-items: center;
+}
+
+.trainInput {
+  width: 64px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  color: #c9d1d9;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+
+  &:focus {
+    outline: none;
+    border-color: #d4a017;
+  }
+}
+
+.trainBtn {
+  background: #d4a017;
+  color: #0d1117;
+  border: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+
+  &:hover {
+    background: #f0c040;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #30363d;
+    color: #8b949e;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* ===== Queue ===== */
+.queueList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.queueItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+}
+
+.queueEmoji {
+  font-size: 1.2rem;
+}
+
+.queueText {
+  flex: 1;
+  color: #c9d1d9;
+}
+
+.queueCount {
+  font-weight: 700;
+  color: #d4a017;
+}
+
+.queueTime {
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.noQueue {
+  color: #8b949e;
+  font-style: italic;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.noCity {
+  text-align: center;
+  padding: 3rem;
+  color: #8b949e;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .trainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewTable {
+    font-size: 0.8rem;
+
+    th, td {
+      padding: 0.4rem 0.5rem;
+    }
+  }
+}

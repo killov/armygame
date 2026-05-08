@@ -153,6 +153,23 @@ export class CityService {
     }
   }
 
+  /** Aplikuje dokončené akce (typ=5) - přidá jednotky do města */
+  async processUnitActions(mestoId: number): Promise<void> {
+    const completed = await this.akceRepo.getCompletedByMesto(mestoId);
+    const m = await this.mestoRepo.getById(mestoId);
+    if (!m) return;
+
+    for (const akce of completed) {
+      if (akce.typ === 5) {
+        const key = `j${akce.typ_jednotky}` as keyof typeof m;
+        const current = (m[key] as number) ?? 0;
+        const count = (akce[`j${akce.typ_jednotky}` as keyof typeof akce] as number) ?? 0;
+        await this.mestoRepo.update(mestoId, { [key]: current + count } as Partial<mesto>);
+        await this.akceRepo.delete(akce.id);
+      }
+    }
+  }
+
   /** Přepočítá produkci surovin podle aktuálních levelů budov */
   private async recalculateProduction(mestoId: number): Promise<void> {
     const m = await this.mestoRepo.getById(mestoId);
