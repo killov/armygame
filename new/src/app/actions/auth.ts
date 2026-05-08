@@ -1,5 +1,6 @@
 'use server';
 
+import 'reflect-metadata';
 import { createHash } from 'crypto';
 import { redirect } from 'next/navigation';
 import { DatabaseService } from '../../db/DatabaseService';
@@ -145,8 +146,9 @@ export async function registerAction(formData: FormData): Promise<{ error: strin
 
         await createSession(user.id, user.jmeno);
     } catch (err) {
-        console.error('registerAction error:', err);
-        return { error: 'Chyba při registraci. Zkuste to znovu.' };
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('registerAction error:', msg);
+        return { error: `Chyba při registraci: ${msg}` };
     }
 
     redirect('/game/mesto');

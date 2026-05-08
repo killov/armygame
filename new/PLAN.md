@@ -31,6 +31,6 @@ Tento dokument slouží ke sledování postupu migrace původní PHP aplikace do
 - [ ] Interakce na mapě: posílání útoků, podpor a přesuny surovin.
 
 ## Fáze 6: Herní Loop a Události
-- [ ] Zpracování časově závislých událostí (pohyb jednotek, konec staveb).
+- [ ] Zpracování časově závislotestujých událostí (pohyb jednotek, konec staveb).
 - [ ] Vyhodnocování bitev a updaty databáze.
 - [ ] Automatické přepočty (CRON joby nebo evaluace při přihlášení/akci hráče).
