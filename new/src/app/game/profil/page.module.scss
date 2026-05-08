@@ -1,0 +1,235 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ===== Header ===== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.avatar {
+  font-size: 3rem;
+  line-height: 1;
+  background: #21262d;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.headerInfo {
+  flex: 1;
+}
+
+.name {
+  color: #f0c040;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.03em;
+}
+
+.subtitle {
+  color: #8b949e;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* ===== Sections ===== */
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  color: #c9d1d9;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #30363d;
+}
+
+/* ===== Stats Grid ===== */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.statCard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #58a6ff;
+  }
+}
+
+.statIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.statInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #d4a017;
+}
+
+/* ===== Research Grid ===== */
+.researchGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.researchCard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #3fb950;
+  }
+}
+
+.researchHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.researchIcon {
+  font-size: 1.1rem;
+}
+
+.researchName {
+  font-size: 0.8rem;
+  color: #8b949e;
+  font-weight: 600;
+}
+
+.researchLevel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.researchLevelLabel {
+  font-size: 0.7rem;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.researchLevelValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #3fb950;
+}
+
+.researchBar {
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.researchBarFill {
+  height: 100%;
+  background: #3fb950;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ===== Table ===== */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th {
+    background: #21262d;
+    color: #8b949e;
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #30363d;
+  }
+
+  td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+  }
+
+  tbody tr:hover td {
+    background: #161b22;
+  }
+}
+
+.cityName {
+  font-weight: 600;
+  color: #d4a017 !important;
+}
+
+.noData {
+  color: #8b949e;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+@media (max-width: 700px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .researchGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
