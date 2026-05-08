@@ -14,7 +14,7 @@ Tento dokument slouží ke sledování postupu migrace původní PHP aplikace do
 - [x] Základní vrstva repozitářů (`UserRepository`, `MestoRepository`).
 - [ ] Tvorba aplikačních služeb (`UserService`, `CityService`, `ArmyService`, `MapService`).
 
-## Fáze 3: UI a Herní Layout
+## Fáze 3: UI a Herní Layoutcal
 - [x] Zprovoznění a konfigurace SCSS modulů.
 - [ ] Hlavní herní layout (globální navigace, panel s přehledem surovin a populace).
 - [ ] Typizované a znovupoužitelné UI komponenty (tlačítka, dialogy, tabulky).

@@ -1,6 +1,8 @@
 import { component } from "ironbean";
+import { createHash } from "crypto";
 import { UserRepository } from "../repositories/UserRepository";
 import { MestoRepository } from "../repositories/MestoRepository";
+import { users } from "@prisma/client";
 
 @component
 export class UserService {
@@ -21,5 +23,14 @@ export class UserService {
             ...user,
             cities
         };
+    }
+
+    async getUserByUsername(username: string) {
+        return this.userRepository.getByJmeno(username);
+    }
+
+    verifyPassword(user: users, password: string): boolean {
+        const hashed = createHash('md5').update(password).digest('hex');
+        return user.heslo === hashed;
     }
 }

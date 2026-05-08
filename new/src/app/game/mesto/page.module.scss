@@ -1,0 +1,236 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.cityName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f0c040;
+  margin: 0 0 0.25rem;
+}
+
+.cityPos {
+  color: #8b949e;
+  font-size: 0.9rem;
+}
+
+/* ===== Resources overview ===== */
+.resourcesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.resourceCard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.resourceCardIcon {
+  font-size: 1.6rem;
+}
+
+.resourceCardName {
+  font-size: 0.8rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.resourceCardValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #d4a017;
+}
+
+.resourceCardProd {
+  font-size: 0.8rem;
+  color: #3fb950;
+}
+
+.resourceCardCap {
+  font-size: 0.75rem;
+  color: #8b949e;
+}
+
+/* ===== Section titles ===== */
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #30363d;
+}
+
+/* ===== Buildings table ===== */
+.tableWrap {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  background: #21262d;
+  color: #8b949e;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #30363d;
+}
+
+.table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #21262d;
+  color: #c9d1d9;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.levelBadge {
+  display: inline-block;
+  background: #21262d;
+  color: #d4a017;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.maxBadge {
+  display: inline-block;
+  background: #3fb950;
+  color: #0d1117;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.upgradeBtn {
+  background: #d4a017;
+  color: #0d1117;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+
+  &:hover {
+    background: #f0c040;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #30363d;
+    color: #8b949e;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* ===== Build queue ===== */
+.queue {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.queueEmpty {
+  color: #8b949e;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.queueList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.queueItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #21262d;
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+}
+
+.queueIcon {
+  font-size: 1.1rem;
+}
+
+.queueName {
+  flex: 1;
+  font-weight: 500;
+  color: #c9d1d9;
+}
+
+.queueTime {
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.noCity {
+  text-align: center;
+  padding: 3rem;
+  color: #8b949e;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .resourcesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .table {
+    font-size: 0.8rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem 0.6rem;
+  }
+}

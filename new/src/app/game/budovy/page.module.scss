@@ -1,0 +1,145 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f0c040;
+  margin-bottom: 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardIcon {
+  font-size: 1.8rem;
+}
+
+.cardName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #c9d1d9;
+}
+
+.cardLevel {
+  font-size: 0.85rem;
+  color: #8b949e;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: #8b949e;
+}
+
+.cardInfoRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cardInfoLabel {
+  color: #8b949e;
+}
+
+.cardInfoValue {
+  color: #c9d1d9;
+  font-weight: 500;
+}
+
+.req {
+  font-size: 0.8rem;
+  color: #f85149;
+}
+
+.reqOk {
+  font-size: 0.8rem;
+  color: #3fb950;
+}
+
+.upgradeBtn {
+  background: #d4a017;
+  color: #0d1117;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  align-self: flex-start;
+  margin-top: 0.25rem;
+
+  &:hover {
+    background: #f0c040;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #30363d;
+    color: #8b949e;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.maxBadge {
+  display: inline-block;
+  background: #3fb950;
+  color: #0d1117;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}
+
+.levelBadge {
+  display: inline-block;
+  background: #21262d;
+  color: #d4a017;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.noCity {
+  text-align: center;
+  padding: 3rem;
+  color: #8b949e;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
