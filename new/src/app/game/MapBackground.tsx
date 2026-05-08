@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { fetchMapData, MapCity } from '@/app/actions/mapa';
 
-const CANVAS_BG = '#0a0f0a';
-const GRID_COLOR = 'rgba(30, 60, 30, 0.3)';
+const CANVAS_BG = '#63903D';
+const GRID_COLOR = 'rgba(0, 0, 0, 0.12)';
 const GRID_SPACING = 40;
 const CITY_RADIUS = 4;
 const OWN_CITY_RADIUS = 6;

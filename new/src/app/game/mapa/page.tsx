@@ -11,6 +11,12 @@ const MAP_SIZE = 1000;
 const MIN_ZOOM = 0.3;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 1.15;
+const GRASS_COLOR = '#63903D';
+
+// Deterministic terrain type from coords: 0=grass, 1=forest, 2=hills
+function terrainType(x: number, y: number): number {
+  return (x * 7 + y * 13) % 3;
+}
 
 export default function MapaPage() {
   const router = useRouter();
@@ -35,6 +41,42 @@ export default function MapaPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Terrain image refs (cached)
+  const imagesLoaded = useRef(false);
+  const [imagesReady, setImagesReady] = useState(false);
+  const imgCityMini = useRef<HTMLImageElement | null>(null);
+  const imgCityMed = useRef<HTMLImageElement | null>(null);
+  const imgForestMini = useRef<HTMLImageElement | null>(null);
+  const imgForestMed = useRef<HTMLImageElement | null>(null);
+  const imgHillsMini = useRef<HTMLImageElement | null>(null);
+  const imgHillsMed = useRef<HTMLImageElement | null>(null);
+
+  // Load terrain images
+  useEffect(() => {
+    if (imagesLoaded.current) return;
+    const sources: [string, React.MutableRefObject<HTMLImageElement | null>][] = [
+      ['/mapa/city_mini.png', imgCityMini],
+      ['/mapa/city_med.png', imgCityMed],
+      ['/mapa/forest_mini.png', imgForestMini],
+      ['/mapa/forest_med.png', imgForestMed],
+      ['/mapa/hills_mini.png', imgHillsMini],
+      ['/mapa/hills_med.png', imgHillsMed],
+    ];
+    let loaded = 0;
+    for (const [src, ref] of sources) {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        ref.current = img;
+        loaded++;
+        if (loaded === sources.length) {
+          imagesLoaded.current = true;
+          setImagesReady(true);
+        }
+      };
+    }
+  }, []);
 
   // Load data
   useEffect(() => {
@@ -83,8 +125,8 @@ export default function MapaPage() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    // Background
-    ctx.fillStyle = '#0a0f0a';
+    // Background - grass green
+    ctx.fillStyle = GRASS_COLOR;
     ctx.fillRect(0, 0, w, h);
 
     // Compute visible cell range
@@ -94,9 +136,56 @@ export default function MapaPage() {
     const endCol = Math.min(MAP_SIZE, Math.ceil((w - offset.x) / cellPx));
     const endRow = Math.min(MAP_SIZE, Math.ceil((h - offset.y) / cellPx));
 
-    // Grid lines (only when zoomed in enough)
+    // Choose mini vs med images based on zoom
+    const useMed = zoom >= 1.5;
+    const imgForest = useMed ? imgForestMed.current : imgForestMini.current;
+    const imgHills = useMed ? imgHillsMed.current : imgHillsMini.current;
+    const imgCity = useMed ? imgCityMed.current : imgCityMini.current;
+
+    // Build a set of city coordinates for quick lookup
+    const { cities, userId } = data;
+    const cityMap = new Map<string, MapCity>();
+    for (const city of cities) {
+      cityMap.set(`${city.x},${city.y}`, city);
+    }
+
+    // Draw terrain tiles for visible cells
+    // At very low zoom, skip some cells for performance
+    let tileStep = 1;
+    if (zoom < 0.4) tileStep = 4;
+    else if (zoom < 0.6) tileStep = 3;
+    else if (zoom < 0.8) tileStep = 2;
+
+    if (imagesLoaded.current) {
+      for (let row = startRow; row < endRow; row += tileStep) {
+        for (let col = startCol; col < endCol; col += tileStep) {
+          const px = offset.x + col * cellPx;
+          const py = offset.y + row * cellPx;
+          const tileSize = cellPx * tileStep;
+
+          // Check if this cell has a city
+          const cityHere = cityMap.get(`${col},${row}`);
+          let img: HTMLImageElement | null = null;
+
+          if (cityHere) {
+            img = imgCity;
+          } else {
+            const t = terrainType(col, row);
+            if (t === 1) img = imgForest;
+            else if (t === 2) img = imgHills;
+            // t === 0 is plain grass, no image needed
+          }
+
+          if (img) {
+            ctx.drawImage(img, px, py, tileSize, tileSize);
+          }
+        }
+      }
+    }
+
+    // Grid lines (only when zoomed in enough) - semi-transparent over terrain
     if (zoom >= 0.5) {
-      ctx.strokeStyle = 'rgba(48, 54, 61, 0.4)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
 
@@ -123,7 +212,7 @@ export default function MapaPage() {
 
     // Coordinate labels on axes (when zoomed in enough)
     if (zoom >= 1.5) {
-      ctx.fillStyle = 'rgba(139, 148, 158, 0.5)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.font = `${Math.max(8, 10 * zoom)}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -152,8 +241,7 @@ export default function MapaPage() {
       }
     }
 
-    // Cities - only render those in visible area
-    const { cities, userId } = data;
+    // Cities overlay - colored border glow and labels
     for (const city of cities) {
       if (city.x < startCol - 1 || city.x > endCol || city.y < startRow - 1 || city.y > endRow) continue;
 
@@ -164,48 +252,52 @@ export default function MapaPage() {
       const isSelected = selectedCity?.id === city.id;
       const isAttackTarget = attackTarget?.id === city.id;
 
-      // Glow
-      const radius = Math.max(4, 6 * zoom);
-      const glowRadius = radius * 2.5;
-
-      const gradient = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, glowRadius);
+      // Border glow ring around city tile
+      const glowRadius = cellPx * 0.55;
+      const gradient = ctx.createRadialGradient(cx, cy, glowRadius * 0.6, cx, cy, glowRadius * 1.3);
       if (isOwn) {
-        gradient.addColorStop(0, 'rgba(35, 134, 54, 0.6)');
-        gradient.addColorStop(1, 'rgba(35, 134, 54, 0)');
+        gradient.addColorStop(0, 'rgba(35, 180, 54, 0.0)');
+        gradient.addColorStop(0.6, 'rgba(35, 180, 54, 0.35)');
+        gradient.addColorStop(1, 'rgba(35, 180, 54, 0)');
       } else {
-        gradient.addColorStop(0, 'rgba(31, 111, 235, 0.6)');
+        gradient.addColorStop(0, 'rgba(31, 111, 235, 0.0)');
+        gradient.addColorStop(0.6, 'rgba(31, 111, 235, 0.35)');
         gradient.addColorStop(1, 'rgba(31, 111, 235, 0)');
       }
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+      ctx.arc(cx, cy, glowRadius * 1.3, 0, Math.PI * 2);
       ctx.fill();
 
-      // City dot
-      ctx.fillStyle = isOwn ? '#3fb950' : '#58a6ff';
-      if (isSelected || isAttackTarget) {
-        ctx.fillStyle = isAttackTarget ? '#f85149' : '#ffa657';
-      }
+      // Colored border ring
+      ctx.strokeStyle = isOwn ? 'rgba(63, 185, 80, 0.8)' : 'rgba(88, 166, 255, 0.8)';
+      ctx.lineWidth = Math.max(1.5, 2 * zoom);
       ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+      ctx.stroke();
 
-      // Selection ring
+      // Selection / attack ring
       if (isSelected || isAttackTarget) {
         ctx.strokeStyle = isAttackTarget ? '#f85149' : '#ffa657';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = Math.max(2, 3 * zoom);
         ctx.beginPath();
-        ctx.arc(cx, cy, radius + 3, 0, Math.PI * 2);
+        ctx.arc(cx, cy, glowRadius + 3, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // City name label (when zoomed in enough)
+      // City name label
       if (zoom >= 0.8) {
-        ctx.fillStyle = '#c9d1d9';
-        ctx.font = `${Math.max(9, 11 * zoom)}px sans-serif`;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(city.jmeno, cx + radius + 4, cy);
+        const fontSize = Math.max(9, 11 * zoom);
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+
+        // Text shadow for readability
+        const labelY = cy + glowRadius + 2;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillText(city.jmeno, cx + 1, labelY + 1);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(city.jmeno, cx, labelY);
       }
     }
 
@@ -216,7 +308,8 @@ export default function MapaPage() {
     ctx.lineWidth = 2;
     ctx.strokeRect(offset.x, offset.y, mapW, mapH);
 
-  }, [data, offset, zoom, selectedCity, attackTarget]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, offset, zoom, selectedCity, attackTarget, imagesReady]);
 
   // Redraw on any relevant change
   useEffect(() => {
