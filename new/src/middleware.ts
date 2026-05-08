@@ -17,7 +17,7 @@ async function verifyToken(token: string): Promise<boolean> {
     }
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get(COOKIE_NAME)?.value;
     const isAuthenticated = token ? await verifyToken(token) : false;
