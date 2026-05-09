@@ -8,23 +8,52 @@ import { sendAttackAction } from '@/app/actions/battle';
 
 const CELL_SIZE = 30;
 const MAP_SIZE = 1000;
-const MIN_ZOOM = 0.3;
-const MAX_ZOOM = 4;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 10;
 const ZOOM_STEP = 1.15;
+const DEFAULT_ZOOM = 3;
 const GRASS_COLOR = '#63903D';
 
-// Deterministic pseudo-random terrain from coords (better distribution)
-function terrainType(x: number, y: number): number {
-  // Simple hash to avoid visible repetition patterns
+// Simple integer hash
+function hash(x: number, y: number): number {
   let h = x * 374761393 + y * 668265263;
   h = ((h ^ (h >> 13)) * 1274126177) >>> 0;
-  return h % 5; // 0,1 = grass (40%), 2,3 = forest (40%), 4 = hills (20%)
+  return h;
 }
 
-function terrainImage(t: number): 'forest' | 'hills' | null {
-  if (t === 2 || t === 3) return 'forest';
-  if (t === 4) return 'hills';
-  return null; // grass, no image
+// Perlin-like noise using grid interpolation for natural clusters
+function noise2d(x: number, y: number): number {
+  const gx = Math.floor(x / 8); // grid cell size = 8 tiles
+  const gy = Math.floor(y / 8);
+  const fx = (x / 8) - gx; // fractional position within cell
+  const fy = (y / 8) - gy;
+  // Smooth interpolation
+  const sx = fx * fx * (3 - 2 * fx);
+  const sy = fy * fy * (3 - 2 * fy);
+  // Corner values
+  const n00 = (hash(gx, gy) % 1000) / 1000;
+  const n10 = (hash(gx + 1, gy) % 1000) / 1000;
+  const n01 = (hash(gx, gy + 1) % 1000) / 1000;
+  const n11 = (hash(gx + 1, gy + 1) % 1000) / 1000;
+  // Bilinear interpolation
+  const nx0 = n00 + sx * (n10 - n00);
+  const nx1 = n01 + sx * (n11 - n01);
+  return nx0 + sy * (nx1 - nx0);
+}
+
+// Terrain type using layered noise for natural-looking clusters
+// Returns: 'forest' | 'hills' | null (grass)
+function terrainImage(x: number, y: number): 'forest' | 'hills' | null {
+  const n1 = noise2d(x, y);       // large-scale biome
+  const n2 = noise2d(x + 500, y + 500); // secondary layer for hills
+  const detail = (hash(x, y) % 100) / 100; // small detail variation
+
+  // Forest: continuous areas where noise > 0.45
+  if (n1 > 0.45 && detail > 0.15) return 'forest';
+  // Hills: where secondary noise is high and not forest
+  if (n2 > 0.6 && detail > 0.25) return 'hills';
+  // Grass: everything else
+  return null;
 }
 
 export default function MapaPage() {
@@ -34,7 +63,7 @@ export default function MapaPage() {
 
   // Pan & zoom state
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
 
   // Drag state (refs for performance - no re-render during drag)
   const dragging = useRef(false);
@@ -179,7 +208,7 @@ export default function MapaPage() {
           if (cityHere) {
             img = imgCity;
           } else {
-            const terrain = terrainImage(terrainType(col, row));
+            const terrain = terrainImage(col, row);
             if (terrain === 'forest') img = imgForest;
             else if (terrain === 'hills') img = imgHills;
             // null = plain grass, no image needed
@@ -435,7 +464,24 @@ export default function MapaPage() {
     };
 
     container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
+
+    // Disable scroll on ALL parent elements while map is mounted
+    // so wheel events reach our handler instead of being consumed by scroll
+    const savedOverflows: [HTMLElement, string][] = [];
+    let el: HTMLElement | null = container.parentElement;
+    while (el) {
+      savedOverflows.push([el, el.style.overflow]);
+      el.style.overflow = 'hidden';
+      el = el.parentElement;
+    }
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      // Restore original overflow values
+      for (const [elem, orig] of savedOverflows) {
+        elem.style.overflow = orig;
+      }
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Touch event handlers ---

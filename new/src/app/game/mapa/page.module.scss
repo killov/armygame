@@ -1,9 +1,12 @@
 .page {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - 38px);
+  position: fixed;
+  top: 38px;
+  left: 200px;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
   background: #63903D;
+  z-index: 5;
 }
 
 /* ---- Map viewport (full area) ---- */
