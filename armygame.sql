@@ -151,6 +151,8 @@ CREATE TABLE `mesto` (
   `b9` int(11) NOT NULL,
   `b10` int(11) NOT NULL,
   `b11` int(11) NOT NULL,
+  `b12` int(11) NOT NULL,
+  `b13` int(11) NOT NULL,
   `v1` int(11) NOT NULL,
   `v2` int(11) NOT NULL,
   `v3` int(11) NOT NULL,

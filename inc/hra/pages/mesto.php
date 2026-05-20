@@ -53,6 +53,16 @@ if($mesto->data["b11"]){
 <a href="#" h="budovy/11" class="link"><?php echo $lang_budova[10]." (".$lang[31].": ".$mesto->data["b11"].")"; ?></a><br>
 <?php
 }
+if($mesto->data["b12"]){
+?>
+<a href="#" h="budovy/12" class="link"><?php echo $lang_budova[11]." (".$lang[31].": ".$mesto->data["b12"].")"; ?></a><br>
+<?php
+}
+if($mesto->data["b13"]){
+?>
+<a href="#" h="budovy/13" class="link"><?php echo $lang_budova[12]." (".$lang[31].": ".$mesto->data["b13"].")"; ?></a><br>
+<?php
+}
 
 $stavba = $mesto->budova_stavba();
 if($stavba){

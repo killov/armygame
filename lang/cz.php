@@ -160,7 +160,9 @@ $lang_budova = [
     "Banka",
     "Tržiště",
     "Kasárny",
-    "Dílna"
+    "Dílna",
+    "Palác",
+    "Kasino"
 ];
 $lang_vyzkum = [
     "Vyzkum1",
