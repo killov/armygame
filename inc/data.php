@@ -233,6 +233,44 @@ $hodnoty = array(
                 "pozadavky_vyzkum" => [
 
                 ]
+            ],
+            12 => [
+                "surovina1" => 5000,
+                "surovina2" => 5000,
+                "surovina3" => 2000,
+                "surovina4" => 2000,
+                "nasobek" => 3.0,
+                "cas" => 1800,
+                "cas_nasobek" => 1.7,
+                "spotreba_zaklad" => 25,
+                "spotreba_nasobek" => 1.4,
+                "maximum" => 5,
+                "pozadavky" => [
+                    1 => 10,
+                    8 => 5
+                ],
+                "pozadavky_vyzkum" => [
+
+                ]
+            ],
+            13 => [
+                "surovina1" => 800,
+                "surovina2" => 600,
+                "surovina3" => 300,
+                "surovina4" => 300,
+                "nasobek" => 1.6,
+                "cas" => 600,
+                "cas_nasobek" => 1.5,
+                "spotreba_zaklad" => 8,
+                "spotreba_nasobek" => 1.25,
+                "maximum" => 10,
+                "pozadavky" => [
+                    1 => 5,
+                    8 => 3
+                ],
+                "pozadavky_vyzkum" => [
+
+                ]
             ]
         ),
         "vyzkum" => [

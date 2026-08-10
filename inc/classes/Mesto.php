@@ -288,7 +288,7 @@ class Mesto extends Base{
     public function budova_stavba(){
         $mesto = $this->data;
 	$x = 1;
-	while($x <= 11){
+	while($x <= 13){
             $budova[$x] = $mesto["b".$x]+1;
             $x++;
 	}
@@ -338,7 +338,7 @@ class Mesto extends Base{
 	global $hodnoty;
 	$sp = 0;
 	$x = 1;
-	while($x <= 11){
+	while($x <= 13){
             $sp += $this->budova_obyvatele($x, $mesto["b".$x]);
             $x++;
 	}
@@ -348,7 +348,7 @@ class Mesto extends Base{
     public function budova_urovne(){
         $mesto = $this->data;
 	$x = 1;
-	while($x <= 11){
+	while($x <= 13){
             $budova[$x] = $mesto["b".$x]+1;
             $x++;
 	}

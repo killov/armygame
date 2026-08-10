@@ -1,6 +1,6 @@
 <?php
 $GLOB = [
-    "pocetbudov" => 11,
+    "pocetbudov" => 13,
     "pocetvyzkumu" => 5,
     "pocetjednotek" => 8
 ];
