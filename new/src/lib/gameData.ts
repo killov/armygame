@@ -1,3 +1,6 @@
+import { HODNOTY } from './game/data';
+import { nazevBudovy } from './game/lang';
+
 export interface BudovaConfig {
   nazev: string;
   surovina1: number;
@@ -9,123 +12,26 @@ export interface BudovaConfig {
   pozadavky: Record<number, number>;
 }
 
-export const BUDOVY: Record<number, BudovaConfig> = {
-  1: {
-    nazev: 'Hlavní budova',
-    surovina1: 100,
-    surovina2: 85,
-    nasobek: 1.4,
-    cas: 80,
-    casNasobek: 1.5,
-    maximum: 30,
-    pozadavky: {},
-  },
-  2: {
-    nazev: 'Stavebniny',
-    surovina1: 50,
-    surovina2: 40,
-    nasobek: 1.6,
-    cas: 40,
-    casNasobek: 1.5,
-    maximum: 30,
-    pozadavky: {},
-  },
-  3: {
-    nazev: 'Železné doly',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 38,
-    casNasobek: 1.5,
-    maximum: 30,
-    pozadavky: {},
-  },
-  4: {
-    nazev: 'Ropné doly',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 39,
-    casNasobek: 1.5,
-    maximum: 30,
-    pozadavky: { 11: 1 },
-  },
-  5: {
-    nazev: 'Zemědělství',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 45,
-    casNasobek: 1.5,
-    maximum: 10,
-    pozadavky: { 1: 3 },
-  },
-  6: {
-    nazev: 'Sklad',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 60,
-    casNasobek: 1.5,
-    maximum: 10,
-    pozadavky: {},
-  },
-  7: {
-    nazev: 'Výzkumná laboratoř',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 60,
-    casNasobek: 1.5,
-    maximum: 20,
-    pozadavky: { 1: 3 },
-  },
-  8: {
-    nazev: 'Banka',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 60,
-    casNasobek: 1.5,
-    maximum: 20,
-    pozadavky: { 1: 1 },
-  },
-  9: {
-    nazev: 'Tržiště',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 60,
-    casNasobek: 1.5,
-    maximum: 10,
-    pozadavky: { 1: 1 },
-  },
-  10: {
-    nazev: 'Kasárny',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 60,
-    casNasobek: 1.5,
-    maximum: 10,
-    pozadavky: { 1: 3, 7: 1 },
-  },
-  11: {
-    nazev: 'Dílna',
-    surovina1: 100,
-    surovina2: 100,
-    nasobek: 1.5,
-    cas: 60,
-    casNasobek: 1.5,
-    maximum: 10,
-    pozadavky: { 1: 5, 7: 5 },
-  },
-};
+export const BUDOVY: Record<number, BudovaConfig> = Object.fromEntries(
+  Object.entries(HODNOTY.budovy).map(([id, b]) => [
+    id,
+    {
+      nazev: nazevBudovy(Number(id)),
+      surovina1: b.surovina1,
+      surovina2: b.surovina2,
+      nasobek: b.nasobek,
+      cas: b.cas,
+      casNasobek: b.cas_nasobek,
+      maximum: b.maximum,
+      pozadavky: b.pozadavky,
+    },
+  ]),
+);
 
-export const PRODUKCE_BASE = 20;
-export const PRODUKCE_NASOBEK = 1.2;
-export const SKLAD_BASE = 1000;
-export const SKLAD_NASOBEK = 1.1;
+export const PRODUKCE_BASE = HODNOTY.produkce[1].zaklad;
+export const PRODUKCE_NASOBEK = HODNOTY.produkce[1].nasobek;
+export const SKLAD_BASE = HODNOTY.sklad.zaklad;
+export const SKLAD_NASOBEK = HODNOTY.sklad.nasobek;
 
 /** Produkce dané suroviny za hodinu pro daný level budovy */
 export function produkce(level: number): number {

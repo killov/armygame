@@ -32,6 +32,10 @@ export default async function PohybPage() {
     orderBy: { dokonceni: 'asc' },
   });
 
+  // Server Component se renderuje jednou na request, čas requestu je tu záměr.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Math.floor(Date.now() / 1000);
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>⚔️ Vojenské operace</h1>
@@ -40,7 +44,6 @@ export default async function PohybPage() {
       ) : (
         <div className={styles.list}>
           {movements.map((m) => {
-            const now = Math.floor(Date.now() / 1000);
             const remaining = m.dokonceni - now;
             const unitCount = [1, 2, 3, 4, 5, 6, 7, 8].reduce(
               (s, i) => s + (((m as Record<string, unknown>)[`j${i}`] as number) ?? 0),

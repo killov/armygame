@@ -57,6 +57,8 @@ export default async function GameLayout({
   if (city) {
     try {
       resources = await cityService.getResources(city.id);
+      // Server Component se renderuje jednou na request, čas requestu je tu záměr.
+      // eslint-disable-next-line react-hooks/purity
       const surovinyTime = Math.floor(Date.now() / 1000);
       resourceBarProps = {
         initialS1: resources.s1,

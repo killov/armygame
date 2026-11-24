@@ -432,9 +432,11 @@ export default function MapaPage() {
 
   // Wheel zoom refs (to avoid stale closures in native listener)
   const zoomRef = useRef(zoom);
-  zoomRef.current = zoom;
   const offsetRef = useRef(offset);
-  offsetRef.current = offset;
+  useEffect(() => {
+    zoomRef.current = zoom;
+    offsetRef.current = offset;
+  }, [zoom, offset]);
 
   // Attach native wheel listener with { passive: false } to allow preventDefault
   useEffect(() => {
@@ -471,6 +473,8 @@ export default function MapaPage() {
     let el: HTMLElement | null = container.parentElement;
     while (el) {
       savedOverflows.push([el, el.style.overflow]);
+      // Rodiče kontejneru, ne ref samotný; v effectu je DOM mutace v pořádku.
+      // eslint-disable-next-line react-hooks/immutability
       el.style.overflow = 'hidden';
       el = el.parentElement;
     }
@@ -579,6 +583,8 @@ export default function MapaPage() {
 
   if (!data) return null;
 
+  // todo: rozměr kontejneru držet ve stavu (ResizeObserver), ať se v renderu nečte DOM přes ref
+  // eslint-disable-next-line react-hooks/refs
   const center = getCenterCoords();
 
   return (

@@ -1,0 +1,444 @@
+// Port inc/data.php ($hodnoty). Klíče 1:1 s PHP (snake_case, indexace od 1), ať jde hodnota
+// dohledat grepem v PHP a test ji může porovnat s json_encode($hodnoty).
+
+/** { id: minimální úroveň } */
+export type Pozadavky = Readonly<Record<number, number>>;
+
+export interface Produkce {
+  zaklad: number;
+  nasobek: number;
+}
+
+export interface Sklad {
+  zaklad: number;
+  nasobek: number;
+}
+
+export interface Banka {
+  zaklad: number;
+  nasobek: number;
+}
+
+export interface Trziste {
+  nosnost: number;
+  obchodnici: number;
+  nasobek: number;
+  delka: number;
+  pomer: number;
+}
+
+export interface Budova {
+  surovina1: number;
+  surovina2: number;
+  surovina3: number;
+  surovina4: number;
+  nasobek: number;
+  cas: number;
+  cas_nasobek: number;
+  spotreba_zaklad: number;
+  spotreba_nasobek: number;
+  maximum: number;
+  pozadavky: Pozadavky;
+  pozadavky_vyzkum: Pozadavky;
+}
+
+export interface Vyzkum {
+  cena: number;
+  nasobek: number;
+  cas: number;
+  cas_nasobek: number;
+  maximum: number;
+  pozadavky: Pozadavky;
+  pozadavky_budova: Pozadavky;
+}
+
+export interface Jednotka {
+  vyzkum_surovina1: number;
+  vyzkum_surovina2: number;
+  vyzkum_surovina3: number;
+  vyzkum_surovina4: number;
+  vyzkum_cas: number;
+  vyzkum_pozadavky_budovy: Pozadavky;
+  vyzkum_pozadavky_vyzkum: Pozadavky;
+  surovina1: number;
+  surovina2: number;
+  surovina3: number;
+  surovina4: number;
+  cas: number;
+  spotreba: number;
+  spotreba_palivo: number;
+  nosnost: number;
+  rychlost: number;
+  nosnost_pechoty: number;
+  utok: number;
+  obrana_pechota: number;
+  obrana_stroje: number;
+}
+
+export type SurovinaId = 1 | 2 | 3 | 4;
+export type BudovaId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+export type VyzkumId = 1 | 2 | 3 | 4 | 5;
+export type JednotkaId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+export interface Hodnoty {
+  produkce: Readonly<Record<SurovinaId, Produkce>>;
+  sklad: Sklad;
+  banka: Banka;
+  trziste: Trziste;
+  budovy: Readonly<Record<BudovaId, Budova>>;
+  vyzkum: Readonly<Record<VyzkumId, Vyzkum>>;
+  jednotky: Readonly<Record<JednotkaId, Jednotka>>;
+}
+
+export const HODNOTY: Hodnoty = {
+  produkce: {
+    1: { zaklad: 20, nasobek: 1.2 },
+    2: { zaklad: 20, nasobek: 1.2 },
+    3: { zaklad: 20, nasobek: 1.2 },
+    4: { zaklad: 20, nasobek: 1.2 },
+  },
+  sklad: { zaklad: 1000, nasobek: 1.1 },
+  banka: { zaklad: 1000, nasobek: 1.1 },
+  trziste: { nosnost: 1000, obchodnici: 1, nasobek: 1.2, delka: 5, pomer: 0.8 },
+  budovy: {
+    1: {
+      surovina1: 100,
+      surovina2: 85,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.4,
+      cas: 80,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 30,
+      pozadavky: {},
+      pozadavky_vyzkum: {},
+    },
+    2: {
+      surovina1: 50,
+      surovina2: 40,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.6,
+      cas: 40,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 30,
+      pozadavky: {},
+      pozadavky_vyzkum: {},
+    },
+    3: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 38,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 30,
+      pozadavky: {},
+      pozadavky_vyzkum: {},
+    },
+    4: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 39,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 30,
+      pozadavky: { 11: 1 },
+      pozadavky_vyzkum: {},
+    },
+    5: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 45,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 10,
+      pozadavky: { 1: 3 },
+      pozadavky_vyzkum: {},
+    },
+    6: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 60,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 10,
+      pozadavky: {},
+      pozadavky_vyzkum: {},
+    },
+    7: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 60,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 20,
+      pozadavky: { 1: 3 },
+      pozadavky_vyzkum: {},
+    },
+    8: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 60,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 20,
+      pozadavky: { 1: 1 },
+      pozadavky_vyzkum: {},
+    },
+    9: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 60,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 10,
+      pozadavky: { 1: 1 },
+      pozadavky_vyzkum: {},
+    },
+    10: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 60,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 10,
+      pozadavky: { 1: 3, 7: 1 },
+      pozadavky_vyzkum: {},
+    },
+    11: {
+      surovina1: 100,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 0,
+      nasobek: 1.5,
+      cas: 60,
+      cas_nasobek: 1.5,
+      spotreba_zaklad: 3,
+      spotreba_nasobek: 1.2,
+      maximum: 10,
+      pozadavky: { 1: 5, 7: 5 },
+      pozadavky_vyzkum: {},
+    },
+  },
+  vyzkum: {
+    1: { cena: 100, nasobek: 1.5, cas: 60, cas_nasobek: 1.5, maximum: 10, pozadavky: {}, pozadavky_budova: { 1: 1 } },
+    2: { cena: 100, nasobek: 1.5, cas: 60, cas_nasobek: 1.5, maximum: 10, pozadavky: { 3: 1 }, pozadavky_budova: { 1: 1 } },
+    3: { cena: 100, nasobek: 1.5, cas: 60, cas_nasobek: 1.5, maximum: 10, pozadavky: {}, pozadavky_budova: { 1: 1 } },
+    4: { cena: 100, nasobek: 1.5, cas: 60, cas_nasobek: 1.5, maximum: 10, pozadavky: {}, pozadavky_budova: { 1: 1 } },
+    5: { cena: 100, nasobek: 1.5, cas: 60, cas_nasobek: 1.5, maximum: 10, pozadavky: {}, pozadavky_budova: { 1: 1 } },
+  },
+  jednotky: {
+    1: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 0,
+      vyzkum_surovina4: 100,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: { 1: 1 },
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 100,
+      cas: 100,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 10,
+      nosnost_pechoty: 0,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    2: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 0,
+      vyzkum_surovina4: 100,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 100,
+      cas: 100,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 12,
+      nosnost_pechoty: 0,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    3: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 0,
+      vyzkum_surovina4: 100,
+      vyzkum_cas: 30,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 100,
+      cas: 10,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 30,
+      rychlost: 3,
+      nosnost_pechoty: 0,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    4: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 0,
+      vyzkum_surovina4: 100,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 0,
+      surovina4: 100,
+      cas: 100,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 6,
+      nosnost_pechoty: 0,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    5: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 100,
+      vyzkum_surovina4: 0,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 100,
+      surovina4: 0,
+      cas: 100,
+      spotreba: 0,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 4,
+      nosnost_pechoty: 4,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    6: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 100,
+      vyzkum_surovina4: 0,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 100,
+      surovina4: 0,
+      cas: 100,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 2,
+      nosnost_pechoty: 8,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    7: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 100,
+      vyzkum_surovina4: 0,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 100,
+      surovina4: 0,
+      cas: 100,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 5,
+      nosnost_pechoty: 5,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+    8: {
+      vyzkum_surovina1: 0,
+      vyzkum_surovina2: 100,
+      vyzkum_surovina3: 100,
+      vyzkum_surovina4: 0,
+      vyzkum_cas: 100,
+      vyzkum_pozadavky_budovy: {},
+      vyzkum_pozadavky_vyzkum: {},
+      surovina1: 0,
+      surovina2: 100,
+      surovina3: 100,
+      surovina4: 0,
+      cas: 100,
+      spotreba: 1,
+      spotreba_palivo: 0,
+      nosnost: 0,
+      rychlost: 6,
+      nosnost_pechoty: 0,
+      utok: 0,
+      obrana_pechota: 0,
+      obrana_stroje: 0,
+    },
+  },
+};

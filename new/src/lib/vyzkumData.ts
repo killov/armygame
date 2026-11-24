@@ -1,3 +1,5 @@
+import { HODNOTY } from './game/data';
+
 export interface VyzkumConfig {
   nazev: string;
   emoji: string;
@@ -11,68 +13,30 @@ export interface VyzkumConfig {
   pozadavkyVyzkum: Record<number, number>; // { vyzkumId: minLevel }
 }
 
-export const VYZKUMY: Record<number, VyzkumConfig> = {
-  1: {
-    nazev: 'Taktika',
-    emoji: '📋',
-    popis: 'Zlepšuje bojovou efektivitu pěchoty',
-    cenaNasobek: 1.5,
-    casNasobek: 1.5,
-    cenaZaklad: 100,
-    casZaklad: 60,
-    maximum: 10,
-    pozadavkyBudova: { 1: 1 },
-    pozadavkyVyzkum: {},
-  },
-  2: {
-    nazev: 'Logistika',
-    emoji: '🚚',
-    popis: 'Urychluje pohyb jednotek',
-    cenaNasobek: 1.5,
-    casNasobek: 1.5,
-    cenaZaklad: 100,
-    casZaklad: 60,
-    maximum: 10,
-    pozadavkyBudova: { 1: 1 },
-    pozadavkyVyzkum: { 3: 1 },
-  },
-  3: {
-    nazev: 'Průzkum',
-    emoji: '🔭',
-    popis: 'Zlepšuje schopnosti špionáže',
-    cenaNasobek: 1.5,
-    casNasobek: 1.5,
-    cenaZaklad: 100,
-    casZaklad: 60,
-    maximum: 10,
-    pozadavkyBudova: { 1: 1 },
-    pozadavkyVyzkum: {},
-  },
-  4: {
-    nazev: 'Obrana',
-    emoji: '🛡️',
-    popis: 'Zvyšuje obranu města',
-    cenaNasobek: 1.5,
-    casNasobek: 1.5,
-    cenaZaklad: 100,
-    casZaklad: 60,
-    maximum: 10,
-    pozadavkyBudova: { 1: 1 },
-    pozadavkyVyzkum: {},
-  },
-  5: {
-    nazev: 'Výzbroj',
-    emoji: '⚔️',
-    popis: 'Zvyšuje útok jednotek',
-    cenaNasobek: 1.5,
-    casNasobek: 1.5,
-    cenaZaklad: 100,
-    casZaklad: 60,
-    maximum: 10,
-    pozadavkyBudova: { 1: 1 },
-    pozadavkyVyzkum: {},
-  },
+// Názvy zůstávají lokálně: lang/cz.php má pro výzkumy jen zástupné "Vyzkum1".."Vyzkum5" a popis se váže k těmhle.
+const UI: Record<number, Pick<VyzkumConfig, 'nazev' | 'emoji' | 'popis'>> = {
+  1: { nazev: 'Taktika', emoji: '📋', popis: 'Zlepšuje bojovou efektivitu pěchoty' },
+  2: { nazev: 'Logistika', emoji: '🚚', popis: 'Urychluje pohyb jednotek' },
+  3: { nazev: 'Průzkum', emoji: '🔭', popis: 'Zlepšuje schopnosti špionáže' },
+  4: { nazev: 'Obrana', emoji: '🛡️', popis: 'Zvyšuje obranu města' },
+  5: { nazev: 'Výzbroj', emoji: '⚔️', popis: 'Zvyšuje útok jednotek' },
 };
+
+export const VYZKUMY: Record<number, VyzkumConfig> = Object.fromEntries(
+  Object.entries(HODNOTY.vyzkum).map(([id, v]) => [
+    id,
+    {
+      ...UI[Number(id)],
+      cenaNasobek: v.nasobek,
+      casNasobek: v.cas_nasobek,
+      cenaZaklad: v.cena,
+      casZaklad: v.cas,
+      maximum: v.maximum,
+      pozadavkyBudova: v.pozadavky_budova,
+      pozadavkyVyzkum: v.pozadavky,
+    },
+  ]),
+);
 
 export function vyzkumCena(id: number, currentLevel: number): number {
   const v = VYZKUMY[id];

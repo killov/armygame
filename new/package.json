@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/ensure-env.mjs && prisma migrate deploy && prisma db seed",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
+    "db:reset": "node scripts/ensure-env.mjs && prisma migrate reset --force"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -27,8 +32,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
+    "eslint-config-next": "^16.1.6",
     "playwright": "^1.59.1",
     "prisma": "^5.22.0",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^4.1.12"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

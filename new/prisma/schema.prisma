@@ -85,7 +85,8 @@ model mapa_bloky {
 }
 
 model mesto {
-  id                 Int    @id @default(autoincrement())
+  // id města = id pole mapy (inc/classes/Mesto.php), proto bez AUTO_INCREMENT jako v armygame.sql
+  id                 Int    @id @default(0)
   x                  Int
   y                  Int
   typ                Int
