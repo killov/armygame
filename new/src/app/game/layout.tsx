@@ -8,6 +8,7 @@ import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
 import { getCurrentUser } from '@/lib/session';
 import { logoutAction } from '@/app/actions/auth';
+import { dohonStavRequestu } from '@/services/engine/request';
 import { produkce } from '@/lib/gameData';
 import { JEDNOTKY } from '@/lib/armyData';
 import ResourceBar from './ResourceBar';
@@ -26,6 +27,7 @@ export default async function GameLayout({
   const akceRepo = new AkceRepository(db);
   const cityService = new CityService(mestoRepo, akceRepo, db);
 
+  await dohonStavRequestu();
   const cities = await mestoRepo.getByUserId(user.id);
   const city = cities[0] ?? null;
   if (!city) redirect('/zalozit-mesto');

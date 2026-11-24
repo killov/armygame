@@ -6,6 +6,7 @@ import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
+import { dohonStavRequestu } from '@/services/engine/request';
 import { JEDNOTKY } from '@/lib/armyData';
 import { trainUnitsAction } from '@/app/actions/army';
 
@@ -29,8 +30,7 @@ export default async function JednotkyPage() {
   }
 
   // Zpracuj dokončené stavby a jednotky
-  await cityService.processCompletedActions(city.id);
-  await cityService.processUnitActions(city.id);
+  await dohonStavRequestu();
 
   // Suroviny (aktualizuje DB)
   const resources = await cityService.getResources(city.id);

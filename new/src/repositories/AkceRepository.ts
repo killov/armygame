@@ -13,17 +13,6 @@ export class AkceRepository {
     });
   }
 
-  async getCompletedByMesto(mestoId: number): Promise<akce[]> {
-    const now = Math.floor(Date.now() / 1000);
-    return this.db.client.akce.findMany({
-      where: {
-        mesto: mestoId,
-        dokonceni: { lte: now },
-      },
-      orderBy: { dokonceni: 'asc' },
-    });
-  }
-
   async create(data: Omit<akce, 'id'>): Promise<akce> {
     return this.db.client.akce.create({ data });
   }

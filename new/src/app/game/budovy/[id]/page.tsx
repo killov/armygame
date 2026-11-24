@@ -8,6 +8,7 @@ import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { UserRepository } from '@/repositories/UserRepository';
 import { CityService } from '@/services/CityService';
+import { dohonStavRequestu } from '@/services/engine/request';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime, produkce, skladKapacita } from '@/lib/gameData';
 import { JEDNOTKY } from '@/lib/armyData';
 import { VYZKUMY, vyzkumCena, vyzkumCas } from '@/lib/vyzkumData';
@@ -81,7 +82,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
   const city = cities[0] ?? null;
   if (!city) return <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Nemáš žádné město...</div>;
 
-  await cityService.processCompletedActions(city.id);
+  await dohonStavRequestu();
   const resources = await cityService.getResources(city.id);
   const updatedCityOrNull = await mestoRepo.getById(city.id);
   if (!updatedCityOrNull) return <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Chyba při načítání města</div>;

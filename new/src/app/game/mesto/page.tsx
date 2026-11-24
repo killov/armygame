@@ -7,6 +7,7 @@ import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
+import { dohonStavRequestu } from '@/services/engine/request';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime, produkce, skladKapacita } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
 import { BattleService } from '@/services/BattleService';
@@ -33,7 +34,7 @@ export default async function MestoPage() {
   }
 
   // 4. Zpracuj dokončené akce
-  await cityService.processCompletedActions(city.id);
+  await dohonStavRequestu();
 
   // Zpracuj příchozí útoky
   const battleService = new BattleService(mestoRepo, akceRepo, db);

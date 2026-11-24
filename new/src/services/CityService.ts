@@ -1,14 +1,12 @@
 import { component } from "ironbean";
 import { MestoRepository } from "../repositories/MestoRepository";
 import { AkceRepository } from "../repositories/AkceRepository";
-import { UserRepository } from "../repositories/UserRepository";
 import { DatabaseService } from "../db/DatabaseService";
 import { mesto } from "@prisma/client";
 import {
   BUDOVY,
   getBuildingUpgradeCost,
   getBuildingTime,
-  produkce,
   skladKapacita,
 } from "../lib/gameData";
 
@@ -132,77 +130,6 @@ export class CityService {
     return (m[key] as number) ?? 0;
   }
 
-  /** Aplikuje dokončené akce (typ=1) na město */
-  async processCompletedActions(mestoId: number): Promise<void> {
-    const completed = await this.akceRepo.getCompletedByMesto(mestoId);
-
-    for (const akce of completed) {
-      if (akce.typ === 1 && akce.budova != null) {
-        // Upgrade budovy - zvýš level o 1
-        const m = await this.mestoRepo.getById(mestoId);
-        if (!m) continue;
-
-        const key = `b${akce.budova}` as keyof typeof m;
-        const currentLevel = (m[key] as number) ?? 0;
-        await this.mestoRepo.update(mestoId, { [key]: currentLevel + 1 } as Partial<mesto>);
-
-        // Přepočítej produkci po upgradu
-        await this.recalculateProduction(mestoId);
-      }
-      // Smaž akci po zpracování
-      await this.akceRepo.delete(akce.id);
-    }
-  }
-
-  /** Aplikuje dokončené akce (typ=5) - přidá jednotky do města */
-  async processUnitActions(mestoId: number): Promise<void> {
-    const completed = await this.akceRepo.getCompletedByMesto(mestoId);
-    const m = await this.mestoRepo.getById(mestoId);
-    if (!m) return;
-
-    for (const akce of completed) {
-      if (akce.typ === 5) {
-        const key = `j${akce.typ_jednotky}` as keyof typeof m;
-        const current = (m[key] as number) ?? 0;
-        const count = (akce[`j${akce.typ_jednotky}` as keyof typeof akce] as number) ?? 0;
-        await this.mestoRepo.update(mestoId, { [key]: current + count } as Partial<mesto>);
-        await this.akceRepo.delete(akce.id);
-      }
-    }
-  }
-
-  /** Přepočítá produkci surovin podle aktuálních levelů budov */
-  private async recalculateProduction(mestoId: number): Promise<void> {
-    const m = await this.mestoRepo.getById(mestoId);
-    if (!m) return;
-
-    await this.mestoRepo.update(mestoId, {
-      surovina1_produkce: produkce(m.b2),
-      surovina2_produkce: produkce(m.b3),
-      surovina3_produkce: produkce(m.b4),
-      surovina4_produkce: produkce(m.b5),
-    });
-  }
-
-  /** Aplikuje dokončené výzkumné akce (typ=2) */
-  async processResearchActions(userId: number, mestoId: number): Promise<void> {
-    const completed = await this.akceRepo.getCompletedByMesto(mestoId);
-    for (const akce of completed) {
-      if (akce.typ === 2 && akce.budova != null) {
-        const userRepo = new UserRepository(this.db);
-        const user = await userRepo.getById(userId);
-        if (!user) continue;
-        const key = `v${akce.budova}` as keyof typeof user;
-        const current = (user[key] as number) ?? 0;
-        await this.db.client.users.update({
-          where: { id: userId },
-          data: { [key]: current + 1 },
-        });
-        await this.akceRepo.delete(akce.id);
-      }
-    }
-  }
-
   /** Spustí stavbu budovy */
   async startBuilding(
     userId: number,
@@ -258,7 +185,8 @@ export class CityService {
       cil: mestoId,
       budova: buildingId,
       delka: buildTime,
-      cas: now,
+      // Engine dokončuje akce podle `cas`, ten je u stavby časem dokončení (Mesto::budova_postav).
+      cas: dokonceni,
       dokonceni,
       typ: 1,
       typ_jednotky: 0,

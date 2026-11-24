@@ -51,21 +51,21 @@ export async function trainUnitsAction(
   });
 
   const now = Math.floor(Date.now() / 1000);
-  const delka = j.cas * pocet;
 
-  // Vytvoř akci typ=5
+  // Vytvoř akci typ=5 ve tvaru Mesto::jednotky_postav — engine cvičí po kusech: `cas` je dokončení
+  // dalšího kusu, `delka` délka jednoho kusu, `obchodniku` jednotka a `surovina1` zbývající počet.
   await akceRepo.create({
     user: session.userId,
     mesto: mestoId,
     cil: mestoId,
     budova: 0,
-    delka,
-    cas: now,
-    dokonceni: now + delka,
+    delka: j.cas,
+    cas: now + j.cas,
+    dokonceni: now + j.cas * pocet,
     typ: 5,
     typ_jednotky: jednotkaId,
-    obchodniku: 0,
-    surovina1: 0,
+    obchodniku: jednotkaId,
+    surovina1: pocet,
     surovina2: 0,
     surovina3: 0,
     surovina4: 0,

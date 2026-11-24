@@ -19,7 +19,7 @@ Seed (`prisma/seed.ts`, port `install.php`) vygeneruje mapu 400×400 a 40×40 bl
 ## Lokálně přes compose
 
 ```bash
-docker compose up    # db (mysql:8.0) + app na http://localhost:3000
+docker compose up    # db (mysql:8.0) + app na http://localhost:3000 + worker herních událostí
 ```
 
 ## Skripty
@@ -28,6 +28,7 @@ docker compose up    # db (mysql:8.0) + app na http://localhost:3000
 | --- | --- |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | Vitest (herní data a texty proti `inc/data.php` / `lang/cz.php`, generátor mapy) |
+| `npm test` | Vitest (herní data a texty proti `inc/data.php` / `lang/cz.php`, generátor mapy; engine proti DB `<DATABASE_URL>_test`) |
 | `npm run build` | produkční build |
+| `npm run worker` | engine herních událostí (náhrada `bin/daemon.php`): dokončuje akce, hladomor, úlohy z `tasks` |
 | `npm run db:reset` | smaže DB, pustí migrace a seed |

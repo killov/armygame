@@ -82,7 +82,8 @@ export async function startResearchAction(
     cil: mestoId,
     budova: vyzkumId,
     delka: cas,
-    cas: now,
+    // Engine dokončuje akce podle `cas`, ten je u výzkumu časem dokončení.
+    cas: now + cas,
     dokonceni: now + cas,
     typ: 2,
     typ_jednotky: 0,

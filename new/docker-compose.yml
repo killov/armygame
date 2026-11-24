@@ -28,6 +28,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Odpovídá až po npm install, migracích a seedu — na to čeká worker.
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+
+  # Náhrada bin/daemon.php: splatné akce, hladomor a úlohy z tabulky tasks (scripts/worker.ts).
+  worker:
+    image: node:20
+    working_dir: /app
+    command: npm run worker
+    environment:
+      DATABASE_URL: mysql://root:armygame@db:3306/armygame
+    volumes:
+      - .:/app
+    depends_on:
+      app:
+        condition: service_healthy
 
 volumes:
   db_data:

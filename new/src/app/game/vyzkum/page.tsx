@@ -6,7 +6,7 @@ import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import { CityService } from '@/services/CityService';
+import { dohonStavRequestu } from '@/services/engine/request';
 import { VYZKUMY, vyzkumCena, vyzkumCas } from '@/lib/vyzkumData';
 import { startResearchAction } from '@/app/actions/research';
 
@@ -18,7 +18,6 @@ export default async function VyzkumPage() {
   const mestoRepo = new MestoRepository(db);
   const akceRepo = new AkceRepository(db);
   const userRepo = new UserRepository(db);
-  const cityService = new CityService(mestoRepo, akceRepo, db);
 
   const cities = await mestoRepo.getByUserId(session.userId);
   const mesto = cities[0] ?? null;
@@ -33,7 +32,7 @@ export default async function VyzkumPage() {
   }
 
   // Zpracuj dokončené výzkumy
-  await cityService.processResearchActions(session.userId, mesto.id);
+  await dohonStavRequestu();
 
   // Načti aktuálního uživatele (po zpracování akcí)
   const user = await userRepo.getById(session.userId);

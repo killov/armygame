@@ -7,6 +7,7 @@ import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
+import { dohonStavRequestu } from '@/services/engine/request';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
 import Link from 'next/link';
@@ -45,7 +46,7 @@ export default async function BudovyPage() {
   }
 
   // Zpracuj dokončené akce
-  await cityService.processCompletedActions(city.id);
+  await dohonStavRequestu();
 
   // Suroviny (aktualizuje DB)
   const resources = await cityService.getResources(city.id);
