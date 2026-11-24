@@ -3,10 +3,10 @@
 Tento dokument slouží ke sledování postupu migrace původní PHP aplikace do moderního stacku (Next.js App Router, TypeScript, Prisma, Ironbean, SCSS moduly). Místo REST API endpointů využíváme pro mutace Next.js Server Actions a pro načítání Server Components.
 
 ## Fáze 1: Autentizace a Session
-- [ ] Přihlašovací a registrační obrazovka (Server Components).
-- [ ] Autentizační logika přes Next.js Server Actions.
-- [ ] Správa stavu přihlášení (JWT / zabezpečené httpOnly cookies).
-- [ ] Zabezpečení rout (Next.js Middleware).
+- [x] Přihlašovací a registrační obrazovka (Server Components).
+- [x] Autentizační logika přes Next.js Server Actions.
+- [x] Správa stavu přihlášení (JWT / zabezpečené httpOnly cookies).
+- [x] Zabezpečení rout (Next.js Proxy, dříve Middleware).
 
 ## Fáze 2: Core Architektura (Ironbean & Prisma)
 - [x] Generování Prisma klienta ze stávající DB.

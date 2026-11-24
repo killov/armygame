@@ -1,8 +1,13 @@
 import { component } from "ironbean";
 import { createHash } from "crypto";
+import bcrypt from "bcryptjs";
 import { UserRepository } from "../repositories/UserRepository";
 import { MestoRepository } from "../repositories/MestoRepository";
 import { users } from "@prisma/client";
+
+export const BCRYPT_ROUNDS = 10;
+
+const LEGACY_MD5 = /^[0-9a-f]{32}$/;
 
 @component
 export class UserService {
@@ -29,8 +34,23 @@ export class UserService {
         return this.userRepository.getByJmeno(username);
     }
 
-    verifyPassword(user: users, password: string): boolean {
-        const hashed = createHash('md5').update(password).digest('hex');
-        return user.heslo === hashed;
+    hashPassword(password: string): Promise<string> {
+        return bcrypt.hash(password, BCRYPT_ROUNDS);
+    }
+
+    /**
+     * User::login. Účty z armygame.sql mají md5 — po úspěšném ověření se rovnou přehashují na bcrypt.
+     */
+    async login(jmeno: string, password: string): Promise<users | null> {
+        const user = await this.userRepository.getByJmeno(jmeno);
+        if (!user) return null;
+
+        if (LEGACY_MD5.test(user.heslo)) {
+            if (createHash("md5").update(password).digest("hex") !== user.heslo) return null;
+            await this.userRepository.update(user.id, { heslo: await this.hashPassword(password) });
+            return user;
+        }
+
+        return (await bcrypt.compare(password, user.heslo)) ? user : null;
     }
 }

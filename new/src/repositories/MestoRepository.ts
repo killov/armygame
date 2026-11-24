@@ -1,6 +1,7 @@
 import { component } from "ironbean";
 import { DatabaseService } from "../db/DatabaseService";
 import { mesto } from "@prisma/client";
+import { Smer, kvadrantWhere } from "../lib/game/vytvorMesto";
 
 @component
 export class MestoRepository {
@@ -12,6 +13,10 @@ export class MestoRepository {
 
     async getByUserId(userId: number): Promise<mesto[]> {
         return this.db.client.mesto.findMany({ where: { user: userId } });
+    }
+
+    async countVKvadrantu(smer: Smer): Promise<number> {
+        return this.db.client.mesto.count({ where: kvadrantWhere(smer) });
     }
 
     async create(data: Omit<mesto, "id">): Promise<mesto> {

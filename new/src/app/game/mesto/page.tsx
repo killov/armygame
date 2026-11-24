@@ -1,7 +1,6 @@
 import 'reflect-metadata';
+import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import { revalidatePath } from 'next/cache';
 import styles from './page.module.scss';
 import { DatabaseService } from '@/db/DatabaseService';
@@ -14,24 +13,10 @@ import { BattleService } from '@/services/BattleService';
 import CountdownTimer from '@/app/game/CountdownTimer';
 import Link from 'next/link';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
-);
-
 export default async function MestoPage() {
   // 1. Session
-  const cookieStore = await cookies();
-  const token = cookieStore.get('armygame_session')?.value;
-  let session: { userId: number; jmeno: string } | null = null;
-  if (token) {
-    try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
-      session = payload as { userId: number; jmeno: string };
-    } catch {
-      session = null;
-    }
-  }
-  if (!session) redirect('/login');
+  const session = await getSession();
+  if (!session) redirect('/');
 
   // 2. Services
   const db = new DatabaseService();

@@ -189,7 +189,7 @@ model tasks {
 model users {
   id        Int    @id @default(autoincrement())
   jmeno     String @db.VarChar(20)
-  heslo     String @db.VarChar(32)
+  heslo     String @db.VarChar(60)
   email     String @db.VarChar(30)
   mesto     Int
   pop       Int

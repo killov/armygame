@@ -12,6 +12,8 @@ npm run dev      # predev: založí .env z .env.example, prisma migrate deploy, 
 Výchozí `.env.example` míří na `mysql://root:armygame@db:3306/armygame` (sourozenecká služba `db`
 ve WorkMux session). Jinou DB nastav v `.env` nebo proměnnou `DATABASE_URL`; `JWT_SECRET` je povinný.
 
+Migrace `1_users_heslo_bcrypt` rozšiřuje `users.heslo` na 60 znaků kvůli bcryptu; staré md5 hesla z `armygame.sql` se přehashují při prvním přihlášení.
+
 Seed (`prisma/seed.ts`, port `install.php`) vygeneruje mapu 400×400 a 40×40 bloků; naplněné tabulky přeskočí.
 
 ## Lokálně přes compose

@@ -1,56 +1,34 @@
 import 'reflect-metadata';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import Link from 'next/link';
 import styles from './layout.module.scss';
 import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { AkceRepository } from '@/repositories/AkceRepository';
 import { CityService } from '@/services/CityService';
+import { getCurrentUser } from '@/lib/session';
+import { logoutAction } from '@/app/actions/auth';
 import { produkce } from '@/lib/gameData';
 import { JEDNOTKY } from '@/lib/armyData';
 import ResourceBar from './ResourceBar';
 import MapBackground from './MapBackground';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
-);
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('armygame_session')?.value;
-  if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as { userId: number; jmeno: string };
-  } catch {
-    return null;
-  }
-}
-
-async function logoutAction() {
-  'use server';
-  const cookieStore = await cookies();
-  cookieStore.delete('armygame_session');
-  redirect('/login');
-}
 
 export default async function GameLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-  if (!session) redirect('/login');
+  const user = await getCurrentUser();
+  if (!user) redirect('/');
 
   const db = new DatabaseService();
   const mestoRepo = new MestoRepository(db);
   const akceRepo = new AkceRepository(db);
   const cityService = new CityService(mestoRepo, akceRepo, db);
 
-  const cities = await mestoRepo.getByUserId(session.userId);
+  const cities = await mestoRepo.getByUserId(user.id);
   const city = cities[0] ?? null;
+  if (!city) redirect('/zalozit-mesto');
 
   let resources = null;
   let resourceBarProps = null;

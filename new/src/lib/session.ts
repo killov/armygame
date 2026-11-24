@@ -1,46 +1,39 @@
-import { SignJWT, jwtVerify } from 'jose';
+import 'reflect-metadata';
+import { cache } from 'react';
 import { cookies } from 'next/headers';
+import type { users } from '@prisma/client';
+import { DatabaseService } from '../db/DatabaseService';
+import { UserRepository } from '../repositories/UserRepository';
+import { COOKIE_NAME, SESSION_DAYS, SessionPayload, signSession, verifySession } from './sessionToken';
 
-const COOKIE_NAME = 'armygame_session';
-const EXPIRY_DAYS = 7;
-
-function getSecret(): Uint8Array {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) throw new Error('JWT_SECRET is not set');
-    return new TextEncoder().encode(secret);
-}
-
-export async function createSession(userId: number, jmeno: string): Promise<string> {
-    const token = await new SignJWT({ userId, jmeno })
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime(`${EXPIRY_DAYS}d`)
-        .sign(getSecret());
-
+export async function createSession(userId: number, jmeno: string): Promise<void> {
+    const token = await signSession({ userId, jmeno });
     const cookieStore = await cookies();
     cookieStore.set(COOKIE_NAME, token, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         path: '/',
-        maxAge: EXPIRY_DAYS * 24 * 60 * 60,
+        maxAge: SESSION_DAYS * 24 * 60 * 60,
         sameSite: 'lax',
     });
-
-    return token;
 }
 
-export async function getSession(): Promise<{ userId: number; jmeno: string } | null> {
+export async function getSession(): Promise<SessionPayload | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE_NAME)?.value;
     if (!token) return null;
-
-    try {
-        const { payload } = await jwtVerify(token, getSecret());
-        const { userId, jmeno } = payload as { userId: number; jmeno: string };
-        return { userId, jmeno };
-    } catch {
-        return null;
-    }
+    return verifySession(token);
 }
+
+/**
+ * Platný JWT po resetu DB ukazuje na neexistujícího hráče — proto se ověřuje i proti DB.
+ * cache(): layout i stránka v rámci jednoho requestu sdílí jeden dotaz.
+ */
+export const getCurrentUser = cache(async (): Promise<users | null> => {
+    const session = await getSession();
+    if (!session) return null;
+    return new UserRepository(new DatabaseService()).getById(session.userId);
+});
 
 export async function deleteSession(): Promise<void> {
     const cookieStore = await cookies();

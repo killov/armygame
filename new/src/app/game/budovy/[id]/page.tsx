@@ -1,7 +1,6 @@
 import 'reflect-metadata';
+import { getSession } from '@/lib/session';
 import { redirect, notFound } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { DatabaseService } from '@/db/DatabaseService';
@@ -17,10 +16,6 @@ import CountdownTimer from '@/app/game/CountdownTimer';
 import MarketForm from './MarketForm';
 import TrainForm from './TrainForm';
 import ResearchForm from './ResearchForm';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
-);
 
 const BUDOVA_IKONY: Record<number, string> = {
   1: '🏛️', 2: '🧱', 3: '⚙️', 4: '🛢️', 5: '🌾',
@@ -71,16 +66,8 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
   if (!budovaConfig) notFound();
 
   // Session
-  const cookieStore = await cookies();
-  const token = cookieStore.get('armygame_session')?.value;
-  let session: { userId: number; jmeno: string } | null = null;
-  if (token) {
-    try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
-      session = payload as { userId: number; jmeno: string };
-    } catch { session = null; }
-  }
-  if (!session) redirect('/login');
+  const session = await getSession();
+  if (!session) redirect('/');
 
   // Services
   const db = new DatabaseService();

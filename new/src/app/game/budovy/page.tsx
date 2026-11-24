@@ -1,7 +1,6 @@
 import 'reflect-metadata';
+import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import { revalidatePath } from 'next/cache';
 import styles from './page.module.scss';
 import { DatabaseService } from '@/db/DatabaseService';
@@ -11,10 +10,6 @@ import { CityService } from '@/services/CityService';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
 import Link from 'next/link';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
-);
 
 const BUDOVA_IKONY: Record<number, string> = {
   1: '🏛️',
@@ -32,18 +27,8 @@ const BUDOVA_IKONY: Record<number, string> = {
 
 export default async function BudovyPage() {
   // Session
-  const cookieStore = await cookies();
-  const token = cookieStore.get('armygame_session')?.value;
-  let session: { userId: number; jmeno: string } | null = null;
-  if (token) {
-    try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
-      session = payload as { userId: number; jmeno: string };
-    } catch {
-      session = null;
-    }
-  }
-  if (!session) redirect('/login');
+  const session = await getSession();
+  if (!session) redirect('/');
 
   // Services
   const db = new DatabaseService();

@@ -14,6 +14,10 @@ export class UserRepository {
         return this.db.client.users.findFirst({ where: { jmeno } });
     }
 
+    async getByEmail(email: string): Promise<users | null> {
+        return this.db.client.users.findFirst({ where: { email } });
+    }
+
     async create(data: Omit<users, "id">): Promise<users> {
         return this.db.client.users.create({ data });
     }

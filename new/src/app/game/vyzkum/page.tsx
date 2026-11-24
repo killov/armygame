@@ -1,7 +1,6 @@
 import 'reflect-metadata';
+import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import styles from './page.module.scss';
 import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
@@ -11,25 +10,9 @@ import { CityService } from '@/services/CityService';
 import { VYZKUMY, vyzkumCena, vyzkumCas } from '@/lib/vyzkumData';
 import { startResearchAction } from '@/app/actions/research';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
-);
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('armygame_session')?.value;
-  if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as { userId: number; jmeno: string };
-  } catch {
-    return null;
-  }
-}
-
 export default async function VyzkumPage() {
   const session = await getSession();
-  if (!session) redirect('/login');
+  if (!session) redirect('/');
 
   const db = new DatabaseService();
   const mestoRepo = new MestoRepository(db);
@@ -54,7 +37,7 @@ export default async function VyzkumPage() {
 
   // Načti aktuálního uživatele (po zpracování akcí)
   const user = await userRepo.getById(session.userId);
-  if (!user) redirect('/login');
+  if (!user) redirect('/');
 
   // Načti frontu akcí
   const pending = await akceRepo.getPendingByMesto(mesto.id);

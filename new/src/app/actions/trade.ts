@@ -1,28 +1,11 @@
 'use server';
 
 import 'reflect-metadata';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
+import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
 import { DatabaseService } from '@/db/DatabaseService';
 import { MestoRepository } from '@/repositories/MestoRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'armygame-super-secret-jwt-key-2024-change-in-prod'
-);
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('armygame_session')?.value;
-  if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as { userId: number; jmeno: string };
-  } catch {
-    return null;
-  }
-}
 
 const SELL_RATE = 0.8;
 const BUY_RATE = 1.25; // 1 / 0.8

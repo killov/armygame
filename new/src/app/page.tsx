@@ -1,119 +1,50 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getSession } from '../lib/session';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/session';
+import { LANG } from '@/lib/game/lang';
+import { PublicShell } from './_components/PublicShell';
+import { LoginForm } from './_components/LoginForm';
+import { RegisterForm } from './_components/RegisterForm';
+import { Changelog } from './_components/Changelog';
+import styles from './_components/PublicShell.module.scss';
 
-export default async function Home() {
-  const session = await getSession();
-  if (session) {
-    redirect('/game/mesto');
-  }
+const TABY = [
+    { tab: 'login', label: LANG[0] },
+    { tab: 'register', label: LANG[1] },
+    { tab: 'changelog', label: 'Changelog' },
+] as const;
 
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Decorative background elements */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage:
-            'radial-gradient(circle at 20% 50%, rgba(212,160,23,0.05) 0%, transparent 50%), ' +
-            'radial-gradient(circle at 80% 20%, rgba(88,166,255,0.05) 0%, transparent 40%)',
-          pointerEvents: 'none',
-        }}
-      />
+type Tab = (typeof TABY)[number]['tab'];
 
-      <main
-        style={{
-          textAlign: 'center',
-          padding: '3rem 2rem',
-          maxWidth: '560px',
-          width: '100%',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        {/* Logo */}
-        <div style={{ marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '3rem', lineHeight: 1 }}>⚔️</span>
-        </div>
-        <h1
-          style={{
-            fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-            fontWeight: 900,
-            color: '#d4a017',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            margin: '0 0 0.5rem',
-            textShadow: '0 0 40px rgba(212,160,23,0.3)',
-          }}
-        >
-          ArmyGame
-        </h1>
-        <p
-          style={{
-            color: '#8b949e',
-            fontSize: '1.1rem',
-            marginBottom: '3rem',
-            letterSpacing: '0.05em',
-          }}
-        >
-          Strategická browserová hra
-        </p>
+export default async function Home({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
+    // Podle hráče v DB, ne podle samotné session — platný JWT bez hráče by jinak točil smyčku / ↔ /game.
+    if (await getCurrentUser()) redirect('/game');
 
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link
-            href="/login"
-            style={{
-              background: '#d4a017',
-              color: '#0d1117',
-              padding: '0.85rem 2.5rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '1rem',
-              letterSpacing: '0.04em',
-              transition: 'background 0.2s',
-              display: 'inline-block',
-              boxShadow: '0 4px 16px rgba(212,160,23,0.25)',
-            }}
-          >
-            Přihlásit se
-          </Link>
-          <Link
-            href="/register"
-            style={{
-              background: 'transparent',
-              color: '#d4a017',
-              padding: '0.85rem 2.5rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '1rem',
-              letterSpacing: '0.04em',
-              border: '2px solid #d4a017',
-              display: 'inline-block',
-              transition: 'background 0.2s',
-            }}
-          >
-            Registrovat
-          </Link>
-        </div>
+    const { tab: tabParam } = await searchParams;
+    const tab: Tab = TABY.find((t) => t.tab === tabParam)?.tab ?? 'login';
 
-        <p style={{ marginTop: '3rem', color: '#484f58', fontSize: '0.8rem' }}>
-          Buduj impérium · Ovládni svět · Poraž soupeře
-        </p>
-      </main>
-    </div>
-  );
+    return (
+        <PublicShell>
+            <nav>
+                <ul className={styles.menu}>
+                    {TABY.map((t) => (
+                        <li key={t.tab}>
+                            <Link
+                                href={`/?tab=${t.tab}`}
+                                className={t.tab === tab ? styles.active : undefined}
+                                aria-current={t.tab === tab ? 'page' : undefined}
+                            >
+                                {t.label}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+            <div className={styles.obsah}>
+                {tab === 'login' && <LoginForm />}
+                {tab === 'register' && <RegisterForm />}
+                {tab === 'changelog' && <Changelog />}
+            </div>
+        </PublicShell>
+    );
 }
