@@ -16,8 +16,8 @@ Tento dokument slouží ke sledování postupu migrace původní PHP aplikace do
 
 ## Fáze 3: UI a Herní Layoutcal
 - [x] Zprovoznění a konfigurace SCSS modulů.
-- [ ] Hlavní herní layout (globální navigace, panel s přehledem surovin a populace).
-- [ ] Typizované a znovupoužitelné UI komponenty (tlačítka, dialogy, tabulky).
+- [x] Hlavní herní layout (globální navigace, panel s přehledem surovin a populace).
+- [x] Typizované a znovupoužitelné UI komponenty (tlačítka, dialogy, tabulky).
 
 ## Fáze 4: Město a Budovy
 - [ ] Obrazovka s přehledem města (Dashboard).

@@ -1,0 +1,463 @@
+// Herní rám, port www/css/styleg.css (#back, .layout-left-top, #suroviny, #levo, #celek, #hlaska, .jednotky)
+// k inc/game.php. Originál je pevný desktop s content-box rozměry; pod $mobile (jako PublicShell) se lišta
+// zalomí do dvou řad, #levo je vysouvací vrstva a okno jde přes celou šířku.
+
+$mobile: 1000px;
+$lista: 44px;
+$lista-mobil: 83px;
+$levo: 250px;
+$gradient-lista: linear-gradient(#aaaaaa, #cccccc, #cccccc, #bebebe, #cccccc, #cccccc, #cfcfcf, #dddddd, #cbcbcb);
+$gradient: linear-gradient(#bebebe, #cccccc, #cccccc, #cfcfcf, #dddddd, #cbcbcb);
+
+// #back — místo mapy zatím jen pozadí, skutečná mapa je ARM-9.
+.back {
+  position: fixed;
+  top: $lista;
+  left: $levo;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+  background-color: #63903d;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 30px);
+
+  @media (max-width: $mobile) {
+    top: $lista-mobil;
+    left: 0;
+  }
+}
+
+// .layout-left-top
+.lista {
+  box-sizing: content-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 5px 28px 0 185px;
+  height: 38px;
+  background: $gradient-lista;
+  border-bottom: 1px solid #555555;
+  border-left: 1px solid #555555;
+  border-radius: 0 0 5px 0;
+  box-shadow: 0 0 2px #000000;
+  z-index: 100;
+  color: #333333;
+
+  @media (max-width: $mobile) {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: center;
+    gap: 4px 2px;
+    padding: 4px;
+    height: $lista-mobil - 9px;
+    border-left: 0;
+    border-radius: 0;
+  }
+}
+
+.jmeno {
+  display: inline-block;
+  font-size: 26px;
+  line-height: 38px;
+
+  @media (max-width: $mobile) {
+    order: 1;
+    flex: 1;
+    min-width: 0;
+    font-size: 18px;
+    line-height: 40px;
+  }
+}
+
+.ren {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.prejmenovani {
+  display: inline-block;
+
+  input {
+    padding: 3px 10px;
+    box-shadow: 0 0 10px -5px #2d2d2d;
+    font-size: 18px;
+  }
+
+  @media (max-width: $mobile) {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    z-index: 10;
+
+    input {
+      width: 100%;
+      height: 40px;
+    }
+  }
+}
+
+// .but-1 … .but-7; pod .lista kvůli specificitě — .kulate ze sdíleného ui.module má vlastní position
+// a pořadí CSS chunků není zaručené.
+.lista {
+  .but {
+    position: absolute;
+    top: 7px;
+  }
+
+  .but1 {
+    left: 15px;
+  }
+
+  .but2 {
+    left: 70px;
+  }
+
+  .but3 {
+    left: 125px;
+  }
+
+  .but4 {
+    right: 15px;
+  }
+
+  .but5 {
+    right: 70px;
+  }
+
+  .but6 {
+    right: 125px;
+  }
+
+  .but7 {
+    right: 180px;
+  }
+
+  // Až za .but1–7, ať reset pozic vyhraje při stejné specificitě.
+  @media (max-width: $mobile) {
+    .but {
+      position: relative;
+      inset: auto;
+      zoom: 0.8;
+    }
+
+    .but4,
+    .but5,
+    .but6,
+    .but7 {
+      order: 2;
+    }
+  }
+}
+
+// Seznam měst pod but-1 (originál má tlačítko jen jako placeholder). Sourozenec tlačítka, ne potomek —
+// zoom tlačítka na mobilu by ho jinak zmenšil i s fixed pozicí.
+.mesta {
+  position: absolute;
+  top: 58px;
+  left: 15px;
+  width: 320px;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 5px;
+  background: white;
+  border-radius: 3px;
+  box-shadow: 1px 1px 5px black;
+  font-size: 16px;
+
+  @media (max-width: $mobile) {
+    position: fixed;
+    top: $lista-mobil;
+    left: 4px;
+    right: 4px;
+    width: auto;
+  }
+}
+
+.mestoVolba {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+// #suroviny / .surovina
+.suroviny {
+  box-sizing: content-box;
+  float: right;
+  width: 500px;
+  padding-right: 130px;
+  margin-left: 20px;
+
+  @media (max-width: $mobile) {
+    order: 3;
+    float: none;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.surovina {
+  position: relative;
+  width: 80px;
+  float: left;
+  margin: 1px;
+  background-color: rgba(100, 100, 100, 0.3);
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 5px;
+  font-size: 14px;
+  height: 30px;
+
+  > div:first-child {
+    border-radius: 5px;
+    height: 100%;
+    background: rgba(250, 250, 250, 0.2);
+    line-height: 30px;
+    text-align: center;
+  }
+
+  span {
+    border-radius: 5px;
+    background: rgba(250, 250, 250, 0.8);
+  }
+
+  &:hover .tooltip,
+  &:focus .tooltip {
+    display: block;
+  }
+
+  @media (max-width: $mobile) {
+    width: auto;
+    margin: 0;
+    font-size: 12px;
+    background-size: 24px 24px;
+  }
+}
+
+.surovina0 {
+  background-image: url('/svg/coins.svg');
+}
+
+.surovina1 {
+  background-image: url('/svg/wall.svg');
+}
+
+.surovina2 {
+  background-image: url('/svg/brick.svg');
+}
+
+.surovina3 {
+  background-image: url('/svg/gasoline-pump.svg');
+}
+
+.surovina4 {
+  background-image: url('/svg/hamburger.svg');
+}
+
+// .ui-tooltip (jQuery UI tooltip nahrazený CSS)
+.tooltip {
+  display: none;
+  position: absolute;
+  top: 34px;
+  left: 0;
+  z-index: 300;
+  min-width: 180px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  background: rgba(20, 20, 20, 0.7);
+  box-shadow: 0 0 5px #aaa;
+  color: white;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+
+  @media (max-width: $mobile) {
+    position: fixed;
+    top: $lista-mobil;
+    left: 4px;
+    right: 4px;
+  }
+}
+
+// #levo
+.levo {
+  position: fixed;
+  left: 0;
+  top: $lista;
+  bottom: 0;
+  width: $levo;
+  z-index: 1;
+  overflow: auto;
+  background: linear-gradient(90deg, #bebebe, #cccccc, #cccccc, #cfcfcf, #dddddd, #cbcbcb);
+  box-shadow: 1px 1px 5px black;
+  color: #000;
+
+  @media (max-width: $mobile) {
+    display: none;
+    top: $lista-mobil;
+    width: min(300px, 85vw);
+    z-index: 50;
+  }
+}
+
+.levoOtevrene {
+  @media (max-width: $mobile) {
+    display: block;
+  }
+}
+
+.levoTlacitko {
+  display: none;
+
+  @media (max-width: $mobile) {
+    display: inline-block;
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    z-index: 60;
+  }
+}
+
+// .jednotky
+.jednotky {
+  margin: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+
+  h2 {
+    box-sizing: content-box;
+    display: block;
+    width: 96%;
+    height: 30px;
+    margin: 0 0 10px 0;
+    padding: 5px 2px 2px 8px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 20px;
+  }
+
+  h2 a,
+  h2 button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  td,
+  th {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 5px;
+    font-size: 14px;
+  }
+
+  select {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}
+
+// #celek / #rip
+.celek {
+  position: fixed;
+  left: $levo;
+  right: 0;
+  top: $lista;
+  bottom: 0;
+  z-index: 1;
+  overflow: auto;
+  background: rgba(20, 20, 20, 0.7);
+  box-shadow: 1px 1px 5px black;
+  transition:
+    opacity 0.5s,
+    visibility 0.5s;
+
+  @media (max-width: $mobile) {
+    left: 0;
+    top: $lista-mobil;
+  }
+}
+
+.celekSkryty {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.rip {
+  height: 100%;
+}
+
+// #hlaska — game.hlaska: 2 s vidět, 1 s fadeOut
+.hlaska {
+  position: fixed;
+  top: 0;
+  left: 200px;
+  right: 650px;
+  z-index: 200;
+  padding: 5px;
+  border-radius: 3px;
+  box-shadow: 1px 1px 5px black;
+  text-align: center;
+  font-size: 28px;
+  color: white;
+  pointer-events: none;
+  animation: hlaska 3s forwards;
+
+  @media (max-width: $mobile) {
+    left: 0;
+    right: 0;
+    border-radius: 0;
+    font-size: 20px;
+  }
+}
+
+.hlaskaOk {
+  background: green;
+}
+
+.hlaskaChyba {
+  background: red;
+}
+
+@keyframes hlaska {
+  0%,
+  66% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

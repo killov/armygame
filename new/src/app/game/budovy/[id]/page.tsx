@@ -13,7 +13,8 @@ import { BUDOVY, getBuildingUpgradeCost, getBuildingTime, produkce, skladKapacit
 import { JEDNOTKY } from '@/lib/armyData';
 import { VYZKUMY, vyzkumCena, vyzkumCas } from '@/lib/vyzkumData';
 import { startBuildingAction } from '@/app/actions/city';
-import CountdownTimer from '@/app/game/CountdownTimer';
+import { Odpocet } from '@/app/_components/ui/Odpocet';
+import { getAktualniMesto } from '@/lib/game/aktualniMesto';
 import MarketForm from './MarketForm';
 import TrainForm from './TrainForm';
 import ResearchForm from './ResearchForm';
@@ -78,9 +79,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
   const cityService = new CityService(mestoRepo, akceRepo, db);
 
   // City
-  const cities = await mestoRepo.getByUserId(session.userId);
-  const city = cities[0] ?? null;
-  if (!city) return <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Nemáš žádné město...</div>;
+  const { mesto: city } = await getAktualniMesto();
 
   await dohonStavRequestu();
   const resources = await cityService.getResources(city.id);
@@ -199,7 +198,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
                       <span style={{ flex: 1, fontWeight: 500, color: '#eee' }}>
                         {BUDOVY[a.budova ?? 0]?.nazev ?? 'Budova'} → lv. {((updatedCity[`b${a.budova}` as keyof typeof updatedCity] as number) ?? 0) + 1}
                       </span>
-                      <CountdownTimer dokonceni={a.dokonceni} />
+                      <Odpocet konec={a.dokonceni} />
                     </div>
                   ))}
                 </div>
@@ -214,7 +213,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
                       <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', padding: '4px 8px', fontSize: '0.85rem' }}>
                         <span>⚔️</span>
                         <span style={{ flex: 1, fontWeight: 500, color: '#eee' }}>{unitCount}x {unitName}</span>
-                        <CountdownTimer dokonceni={a.dokonceni} />
+                        <Odpocet konec={a.dokonceni} />
                       </div>
                     );
                   })}
@@ -227,7 +226,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
                     <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', padding: '4px 8px', fontSize: '0.85rem' }}>
                       <span>🔬</span>
                       <span style={{ flex: 1, fontWeight: 500, color: '#eee' }}>{VYZKUMY[a.budova ?? 0]?.nazev ?? 'Výzkum'}</span>
-                      <CountdownTimer dokonceni={a.dokonceni} />
+                      <Odpocet konec={a.dokonceni} />
                     </div>
                   ))}
                 </>
@@ -471,7 +470,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
                       <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', padding: '4px 8px', fontSize: '0.85rem', marginBottom: '4px' }}>
                         <span>{JEDNOTKY[a.typ_jednotky]?.emoji ?? '⚔️'}</span>
                         <span style={{ flex: 1, color: '#eee' }}>{unitCount}x {JEDNOTKY[a.typ_jednotky]?.nazev ?? 'Jednotka'}</span>
-                        <CountdownTimer dokonceni={a.dokonceni} />
+                        <Odpocet konec={a.dokonceni} />
                       </div>
                     );
                   })}
@@ -510,7 +509,7 @@ export default async function BuildingDetailPage({ params }: { params: Promise<{
                       <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', padding: '4px 8px', fontSize: '0.85rem', marginBottom: '4px' }}>
                         <span>{JEDNOTKY[a.typ_jednotky]?.emoji ?? '🔧'}</span>
                         <span style={{ flex: 1, color: '#eee' }}>{unitCount}x {JEDNOTKY[a.typ_jednotky]?.nazev ?? 'Jednotka'}</span>
-                        <CountdownTimer dokonceni={a.dokonceni} />
+                        <Odpocet konec={a.dokonceni} />
                       </div>
                     );
                   })}

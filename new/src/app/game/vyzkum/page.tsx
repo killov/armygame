@@ -9,6 +9,7 @@ import { UserRepository } from '@/repositories/UserRepository';
 import { dohonStavRequestu } from '@/services/engine/request';
 import { VYZKUMY, vyzkumCena, vyzkumCas } from '@/lib/vyzkumData';
 import { startResearchAction } from '@/app/actions/research';
+import { getAktualniMesto } from '@/lib/game/aktualniMesto';
 
 export default async function VyzkumPage() {
   const session = await getSession();
@@ -19,17 +20,7 @@ export default async function VyzkumPage() {
   const akceRepo = new AkceRepository(db);
   const userRepo = new UserRepository(db);
 
-  const cities = await mestoRepo.getByUserId(session.userId);
-  const mesto = cities[0] ?? null;
-
-  if (!mesto) {
-    return (
-      <div className={styles.page}>
-        <h1 className={styles.title}>⚗️ Výzkum</h1>
-        <p>Nemáš žádné město.</p>
-      </div>
-    );
-  }
+  const { mesto } = await getAktualniMesto();
 
   // Zpracuj dokončené výzkumy
   await dohonStavRequestu();

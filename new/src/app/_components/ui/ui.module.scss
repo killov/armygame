@@ -1,0 +1,196 @@
+// Sdílené herní komponenty, port www/css/styleg.css. Originál počítá s content-box, globals.scss má border-box,
+// proto ho prvky s pevnou šířkou/výškou a paddingem vrací zpět.
+
+$gradient: linear-gradient(#bebebe, #cccccc, #cccccc, #cfcfcf, #dddddd, #cbcbcb);
+$gradient-th: linear-gradient(#aaaaaa, #cccccc, #cccccc, #bebebe, #cccccc, #cccccc, #cfcfcf, #dddddd, #cbcbcb);
+
+// #obsah
+.okno {
+  margin: 5px;
+  padding: 5px;
+  background-color: white;
+  border-radius: 3px;
+  min-height: 300px;
+  box-shadow: inset -1px -1px 5px black;
+  color: #000;
+
+  h2,
+  h3 {
+    box-sizing: content-box;
+    display: block;
+    padding: 5px 2%;
+    width: 96%;
+    margin: 0 0 10px 0;
+    border-radius: 5px;
+    background: $gradient;
+  }
+
+  h2 {
+    height: 30px;
+  }
+
+  input[type='text'] {
+    padding: 3px 10px;
+    box-shadow: 0 0 10px -5px #2d2d2d;
+  }
+}
+
+// .but-out-s / .but-in-s / .but-hov-s
+.kulate {
+  display: block;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 0;
+  background: url('/img/empty_bor.png') center no-repeat;
+  background-size: cover;
+  position: relative;
+  cursor: pointer;
+}
+
+.kulateIn {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 44px;
+  height: 43px;
+  background: url('/img/empty_but.png') no-repeat;
+  background-size: cover;
+}
+
+.kulateHov {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 3px;
+  bottom: 2px;
+  border-radius: 50px;
+}
+
+.kulateIkona {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 1px;
+  font-size: 32px;
+  line-height: 1;
+  text-align: center;
+  color: #333333;
+}
+
+.kulate:hover,
+.kulate:focus-visible {
+  .kulateHov {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 6px #eeeeee;
+  }
+
+  .kulateIkona {
+    text-shadow: 0 0 6px #eeeeee;
+    color: #111111;
+  }
+}
+
+// .postav, input[type=submit]
+.tlacitko {
+  display: inline-block;
+  border: 1px solid black;
+  padding: 0 20px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 5px;
+  background-color: forestgreen;
+  color: cornsilk;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: goldenrod;
+    color: black;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.dorucene,
+.prehled {
+  width: 100%;
+}
+
+.dorucene {
+  td {
+    padding: 5px;
+  }
+
+  th {
+    border-radius: 3px;
+    height: 20px;
+    padding: 2px 2%;
+    text-align: left;
+    background: $gradient-th;
+  }
+}
+
+.prehled {
+  td {
+    border-radius: 3px;
+    height: 20px;
+    padding: 2px 2%;
+    text-align: left;
+  }
+
+  tr {
+    background: gainsboro;
+  }
+
+  tr:hover {
+    background: yellowgreen;
+  }
+
+  tr[aria-current='true'] {
+    background: yellow;
+  }
+}
+
+// .bunka + .surovina0–4 / .cas / .spotreba
+.bunka {
+  display: inline-block;
+  padding: 2px 5px 2px 25px;
+  background-size: 16px 16px;
+  border: solid 2px #bbb;
+  border-radius: 5px;
+  background-repeat: no-repeat;
+  background-position: 4px 3px;
+  background-color: #cccfff;
+  margin-left: 5px;
+}
+
+.surovina0 {
+  background-image: url('/svg/coins.svg');
+}
+
+.surovina1 {
+  background-image: url('/svg/wall.svg');
+}
+
+.surovina2 {
+  background-image: url('/svg/brick.svg');
+}
+
+.surovina3 {
+  background-image: url('/svg/gasoline-pump.svg');
+}
+
+.surovina4 {
+  background-image: url('/svg/hamburger.svg');
+}
+
+.cas {
+  background-image: url('/svg/hourglass.svg');
+}
+
+.spotreba {
+  background-image: url('/svg/avatar.svg');
+}

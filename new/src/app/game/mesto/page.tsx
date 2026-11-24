@@ -11,7 +11,8 @@ import { dohonStavRequestu } from '@/services/engine/request';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime, produkce, skladKapacita } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
 import { BattleService } from '@/services/BattleService';
-import CountdownTimer from '@/app/game/CountdownTimer';
+import { Odpocet } from '@/app/_components/ui/Odpocet';
+import { getAktualniMesto } from '@/lib/game/aktualniMesto';
 import Link from 'next/link';
 
 export default async function MestoPage() {
@@ -25,13 +26,8 @@ export default async function MestoPage() {
   const akceRepo = new AkceRepository(db);
   const cityService = new CityService(mestoRepo, akceRepo, db);
 
-  // 3. Města
-  const cities = await mestoRepo.getByUserId(session.userId);
-  const city = cities[0] ?? null;
-
-  if (!city) {
-    return <div className={styles.noCity}>Nemáš žádné město...</div>;
-  }
+  // 3. Aktuální město
+  const { mesto: city } = await getAktualniMesto();
 
   // 4. Zpracuj dokončené akce
   await dohonStavRequestu();
@@ -102,7 +98,7 @@ export default async function MestoPage() {
                     {((updatedCity?.[`b${a.budova}` as keyof typeof updatedCity] as number) ?? 0) + 1}
                   </span>
                   <span className={styles.queueTime}>
-                    <CountdownTimer dokonceni={a.dokonceni} />
+                    <Odpocet konec={a.dokonceni} />
                   </span>
                 </li>
               ))}

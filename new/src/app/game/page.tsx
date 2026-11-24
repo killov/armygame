@@ -1,18 +1,9 @@
-import 'reflect-metadata';
-import { redirect } from 'next/navigation';
-import { DatabaseService } from '@/db/DatabaseService';
-import { MestoRepository } from '@/repositories/MestoRepository';
-import { getCurrentUser } from '@/lib/session';
-import { logoutAction } from '@/app/actions/auth';
+import { getAktualniMesto } from '@/lib/game/aktualniMesto';
 import { LANG } from '@/lib/game/lang';
 
-// Minimální cíl po založení města a po loginu; herní přehled je ARM-4.
+// Minimální přehled aktuálního města; odhlášení je v liště rámu (but-4).
 export default async function GamePage() {
-    const user = await getCurrentUser();
-    if (!user) redirect('/');
-
-    const [mesto] = await new MestoRepository(new DatabaseService()).getByUserId(user.id);
-    if (!mesto) redirect('/zalozit-mesto');
+    const { user, mesto } = await getAktualniMesto();
 
     return (
         <section>
@@ -23,9 +14,6 @@ export default async function GamePage() {
             <p>
                 {LANG[32]}: {user.jmeno}
             </p>
-            <form action={logoutAction}>
-                <button type="submit">{LANG[19]}</button>
-            </form>
         </section>
     );
 }

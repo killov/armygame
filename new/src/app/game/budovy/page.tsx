@@ -11,6 +11,7 @@ import { dohonStavRequestu } from '@/services/engine/request';
 import { BUDOVY, getBuildingUpgradeCost, getBuildingTime } from '@/lib/gameData';
 import { startBuildingAction } from '@/app/actions/city';
 import Link from 'next/link';
+import { getAktualniMesto } from '@/lib/game/aktualniMesto';
 
 const BUDOVA_IKONY: Record<number, string> = {
   1: '🏛️',
@@ -38,12 +39,7 @@ export default async function BudovyPage() {
   const cityService = new CityService(mestoRepo, akceRepo, db);
 
   // Město
-  const cities = await mestoRepo.getByUserId(session.userId);
-  const city = cities[0] ?? null;
-
-  if (!city) {
-    return <div className={styles.noCity}>Nemáš žádné město...</div>;
-  }
+  const { mesto: city } = await getAktualniMesto();
 
   // Zpracuj dokončené akce
   await dohonStavRequestu();

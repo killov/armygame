@@ -9,6 +9,7 @@ import { CityService } from '@/services/CityService';
 import { dohonStavRequestu } from '@/services/engine/request';
 import { JEDNOTKY } from '@/lib/armyData';
 import { trainUnitsAction } from '@/app/actions/army';
+import { getAktualniMesto } from '@/lib/game/aktualniMesto';
 
 export default async function JednotkyPage() {
   // Session
@@ -22,12 +23,7 @@ export default async function JednotkyPage() {
   const cityService = new CityService(mestoRepo, akceRepo, db);
 
   // Město
-  const cities = await mestoRepo.getByUserId(session.userId);
-  const city = cities[0] ?? null;
-
-  if (!city) {
-    return <div className={styles.noCity}>Nemáš žádné město...</div>;
-  }
+  const { mesto: city } = await getAktualniMesto();
 
   // Zpracuj dokončené stavby a jednotky
   await dohonStavRequestu();
